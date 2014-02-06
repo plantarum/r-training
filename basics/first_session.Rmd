@@ -22,7 +22,7 @@ Objectives
 Getting Started
 ==
 
-To begin with, we're going to run R in a terminal. You will usually be using a more sophisticated and user-friendly interface, but for this first session we'll use the bare-bones version.
+To begin with, we're going to run R in a terminal. You will usually be using a more sophisticated and user-friendly interface, but for this first session we'll use the bare-bones version. 
 
 From the terminal, R is started by entering the letter `R` at the prompt. `R` responds with:
 
