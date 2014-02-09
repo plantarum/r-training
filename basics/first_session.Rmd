@@ -1,23 +1,23 @@
 ```{r, include = FALSE}
+library(knitr)
 options(digits=5)
 opts_chunk$set(comment=NA)
 ```
 
-A first R session
+Lesson 1: A first R session
 ==
 
 Objectives
 ==
 * Familiarize ourselves with the R console
-* Understand the interface:
- *   prompts
- *   comments
- *   entering commands
- *   storing values 
- *   using the history
- *   tab-completion
- *   getting help
- *   quiting
+    +   prompts
+    +   comments
+    +   entering commands
+    +   storing values 
+    +   using the history
+    +   tab-completion
+    +   getting help
+    +   quitting
 
 Getting Started
 ==
@@ -49,6 +49,7 @@ Type 'q()' to quit R.
 ```
 
 You'll see this everytime you start `R`, so most of us get in the habit of ignoring it. However, this header contains some important information:
+
 * which version of `R` you are running. If it's more than six months old, chances are a newer version is available. It's usually not a problem to run a _slightly_ older version. But if you want to use actively developed packages, you'll save some head-aches by staying up to date.
 * get citation information with the function `citation()`
 * view some demonstrations with `demo()`

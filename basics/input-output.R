@@ -8,36 +8,44 @@
 ## Functions ##
 ###############
 
-## Loading and saving data uses some complex functions. So before we get to input/output,
-## we'll go over how R functions work.
+## Loading and saving data uses some complex functions. As does most of
+## the data analysis we'll be doing. So before we get to input/output,
+## we'll learn how R functions work.
 
-## R functions are called by name, with all of their arguments provided inside brackets
-## after the name. Let's take a closer look at the scale() function as an example:
+## R functions are called by name, with all of their arguments provided
+## inside brackets after the name. Let's take a closer look at the
+## scale() function as an example:
 
 ## First, we need some data to scale:
 mymat <- iris[1:6, 1:4]
 
+## We'll learn what this code means in the next lesson. For now, just
+## know that we've extracted a small 6x4 subset of the iris data.frame.
+
 ## Now take a look at the help for scale:
 ?scale
 
-## scale() has three arguments: x, center, and scale. When we call the function, we can
-## provide these arguments in order:
+## scale() has three arguments: x, center, and scale. When we call the
+## function, we can provide these arguments in order:
 
 scale(mymat, TRUE, FALSE)
 
-## mymat is the first argument, so it is used in place of 'x' in the function. TRUE is the
-## second argument, so it is used in place of center, and FALSE is used in place of scale.
-## The result is the mymat matrix is centered (the mean of each column is subtracted from
-## all the values in that column), but not scaled (which means each value is divided by
-## the standard deviation of its column).
+## mymat is the first argument, so it is used in place of 'x' in the
+## function. TRUE is the second argument, so it is used in place of
+## center, and FALSE is used in place of scale. The result is the mymat
+## matrix is centered (the mean of each column is subtracted from all
+## the values in that column), but not scaled (which means each value is
+## divided by the standard deviation of its column).
 
-## It's very easy to forget the order argument should be in, so you can make a
-## mistake calling a function like this. It's better to use the argument names:
+## It's very easy to forget the order argument should be in, so you can
+## make a mistake calling a function like this. It's clearer to use the
+## argument names:
 
 scale(mymat, center = TRUE, scale = FALSE)
 
-## This is the same as the first function call. When you use the argument names, the order
-## isn't important anymore, so this is also the same:
+## This is the same as the first function call. When you use the
+## argument names, the order isn't important anymore, so this is also
+## the same:
 
 scale(mymat, scale = FALSE, center = TRUE)
 
@@ -45,23 +53,50 @@ scale(mymat, scale = FALSE, center = TRUE)
 
 scale(center = TRUE, x = mymat, scale = FALSE)
 
-## Take another look at the help file. Note that in the 'usage' section it shows:
+## Take another look at the help file. Note that in the 'usage' section
+## it shows:
 ##       scale(x, center = TRUE, scale = TRUE)
 
-## This means that center has a default value of TRUE, and scale has a default value of
-## TRUE. Which means that if you don't call these arguments, R assumes they are both TRUE.
-## On the other hand, x doesn't have a default value, so it is a required argument -
-## scale() won't work without it.
+## This means that center has a default value of TRUE, and scale has a
+## default value of TRUE. Which means that if you don't call these
+## arguments, R assumes they are both TRUE. On the other hand, x doesn't
+## have a default value, so it is a required argument - scale() won't
+## work without it.
 
-## Back to our function call above - since we are using the default value of center, we
-## don't need to use this argument:
+## Back to our function call above - since we are using the default
+## value of center, we don't need to use this argument:
 
 scale(mymat, scale = FALSE)
 
-## Most of the time, we'll use scale to standardize our data, which uses both scaling and
-## centering. That means we can just use:
+## Most of the time, we'll use scale to standardize our data, which uses
+## both scaling and centering. That means we can just use:
 
 scale(mymat)
+
+## Note that the results of scale are dumped onto the screen. Examine
+## mymat again:
+
+mymat
+
+## mymat hasn't changed! Most functions in R, and most of the functions
+## you will write, do not modify the objects that you pass to them.
+## Code that follows this rule is known as 'functional programming'.
+## This is a useful concept for data analysis. We pass arguments to
+## functions, and functions return results. Functions should not alter
+## their arguments, or cause other 'side effects'.
+
+## A consequence of this functional programming style is that we need to
+## tell R to store the results of a function call:
+
+mymat.scaled <- scale(mymat)
+
+## Now the result of the argument is stored for further use. We won't be
+## using this data in the rest of this lesson, so we can remove it from
+## the workspace:
+
+rm(c(mymat.scaled, mymat))
+
+## c() is a basic R function - it combines its arguments into a vector. 
 
 ##################
 ## Loading data ##

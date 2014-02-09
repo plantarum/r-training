@@ -1,5 +1,12 @@
-.Rproj.user
-.Rhistory
-.RData
-.html
-.md
+*.Rproj.user
+*.Rhistory
+*.RData
+*.html
+*.md
+*.pdf
+*.tex
+*.aux
+*.log
+auto
+*~
+*out
