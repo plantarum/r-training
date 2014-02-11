@@ -1,0 +1,107 @@
+Using an integrated text editor/development environment
+==
+
+Objectives
+--
+1. Introduction to R text editors and IDEs 
+      1. Interacting with the command line
+      2. Code formatting
+2.  Managing your R workflow
+
+Interactive Development Environments
+--
+
+### Emacs
+
+
+Interacting with R through a terminal window is fine when you are just setting up long jobs to run on a remote server. However, it gets tedious when you are spending many hours developing multiple scripts. You can make life easier for yourself by using a text editor or interactive development environment (IDE) that has R integrated. There are many options available. The most powerful is [http://www.gnu.org/software/emacs][Emacs]. Emacs is fully programmable, and some users have taken advantage of its capabilities to develop a very sophisticated R development environment called [http://ess.r-project.org/][ESS].
+
+If you do a lot of coding, in R or other computer languages, it is worth investigating Emacs. You can install Emacs with ESS on Ubuntu very easily:
+
+```
+sudo apt-get install emacs ess
+```
+
+### RStudio
+
+However, the power of Emacs comes at a cost - it's not as intuitive as some of the other R graphical interfaces available. To keep things simple, today we'll use a program called RStudio. It allows us to connect to R running on the sioni server from our web browser. You can only do this from within the AAFC network. You can install a stand-alone version of RStudio on your own computer, which will allow you to use it with R without a network connection to sioni as well. If you want to do that, fetch the install files from here: http://rstudio.org/download/
+
+From the command line on Linux, install with dpkg:
+
+```
+sudo dpkg -i rstudio-0.94.110-i386.deb
+```
+
+None of this is necessary for today. We can simply connect to the server:
+
+http://mycology:12000
+
+(if you are using Firefox, hold down the control key when you click the link to open RStudio in a new tab)
+
+You should now have an RStudio window open, with three separate panes. In the left pane is the familiar R console. It looks just like R in a command terminal, but it looks a little bit nicer - your input is black, R's output is blue. RStudio has also changed a few behaviours. It knows about quotes and parentheses, for one thing. So if you type a `"`, it automatically adds the closing `"`. And when you get to the end of the quote, if you type the closing `"` again, it 'types over' the quote that's already there, so the quotes stay matched up. The same thing works for `()` and `{}`.
+
+RStudio also changes how the help system works. Try:
+
+```
+?t.test
+```
+
+Instead of calling up `less`, the help is opened in the lower-right pane. The links in the pane are clickable, and you can move forward and back using the arrow buttons at the top, just like a web browser. Again, the help files here are local (in this case on the sioni server), so you don't need a connection to the internet to read them.
+
+The real benefit of an R IDE is that it allows you to easily manage your script files, and to pass code back and forth between the script and the R console. Open the file from the previous module, first_session.R. You can use the file browser in the lower right pane, or the file menu from the menu bar.
+
+From an open script file, you can pass to the R console by typing `CTRL-ENTER` when the cursor is on the line you want to run. If you have multiple lines selected, `CTRL-ENTER` will run all of them at once. Try this with the script.
+
+You may still want to enter text directly into the console. `CTRL-1` moves the cursor to the script, `CTRL-2` moves the cursor to the console.
+
+One more important pane to note is the history tab in the upper right corner. This pane keeps a running tab of all the commands you have run in the R console. Very handy for quickly scanning back through your work. You can also send commands from your history back to the console, or into your script file.
+
+RStudio provides many other features, which I'll leave to you to discover. The help menu contains an entry documenting all the keyboard shortcuts - I highly recommend you get in the habit of using them. Your carpel tunnels will thank you!
+
+Managing your R workflow
+--
+
+A little bit of organization makes your R work much more efficient. I recommend the following:
+
+### R console
+
+Interacting directly with the R console is good when you are experimenting with new techniques. However, sifting through console output to try and figure out what worked and what didn't is not fun. The more work you do in a script file, the easier it will be to keep track of what you've done, what works and what doesn't. So get in the habit of working in your script files as your main interaction with R, and avoid the console except for quick calculations and throw-away work.
+
+### R script files
+
+Most of your R work actually consists of writing script files. A few tips to help you keep organized:
+
+#### Comments
+
+Comment your code! You will have to revisit this code again in the future, and 'future you' may not remember R, or your data, or what your analysis was supposed to do. Keeping comments in the same file as your code makes life easier on 'future you'.
+
+#### Formatting
+
+Remember that R doesn't care about space. So you can use space to keep your code readable. Take advantage of the space bar, tab key and enter key. Compare the following code:
+
+```
+coords <- cbind(X = rep(1:M, each = M), Y = rep(1:M, M))
+
+coords <- transform(coords, XY = X * Y, Xe2 = X^2, Ye2 = Y^2,
+                    Xe2Y = X^2 * Y, XYe2 = X * Y^2, Xe3 = X^3,
+                    Ye3 = Y^3)
+
+ret    <- list(p = params, coords = coords, snaps = list("0" = pop))
+```
+
+Or this:
+
+```
+coords=cbind(X=rep(1:M,each=M),Y=rep(1:M,M))
+coords=transform(coords,XY=X*Y,Xe2=X^2,Ye2=Y^2,Xe2Y=X^2*Y,XYe2=X*Y^2,Xe3=X^3,Ye3=Y^3)
+ret=list(p=params,coords=coords,snaps=list("0"=pop))
+```
+
+Which would you rather try and figure out?
+
+With a good editor, indentation is taken care of automatically. RStudio does an OK job of suggesting appropriate indentation. The main thing to keep in mind is making it easy on yourself and others to read through your code. 
+
+#### File management
+
+I prefer to use two main files for my R development. I do most of my work in a 'working' script, which contains nearly everything I've tried. When I hit on an analysis that works the way I want it to, I transfer that code to my 'keeper' script, which contains just the good stuff. That way, when I return to the code at a later date, the keeper script contains the code I used to run the analysis in the paper, which is enough to repeat my work. If I need to make major changes or additions, the working script documents all my work, some of which may be useful in extending the code in the keeper script. I strongly recommend against having R save the workspace between sessions. You may save a bit of time in the short term, but it becomes a challenge to figure out what all the objects are - which ones are current, which ones are from out-dated work etc.
+
