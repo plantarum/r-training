@@ -14,7 +14,7 @@ Interactive Development Environments
 ### Emacs
 
 
-Interacting with R through a terminal window is fine when you are just setting up long jobs to run on a remote server. However, it gets tedious when you are spending many hours developing multiple scripts. You can make life easier for yourself by using a text editor or interactive development environment (IDE) that has R integrated. There are many options available. The most powerful is [http://www.gnu.org/software/emacs][Emacs]. Emacs is fully programmable, and some users have taken advantage of its capabilities to develop a very sophisticated R development environment called [http://ess.r-project.org/][ESS].
+Interacting with R through a terminal window is fine when you are just setting up long jobs to run on a remote server. However, it gets tedious when you are spending many hours developing multiple scripts. You can make life easier for yourself by using a text editor or interactive development environment (IDE) that has R integrated. There are many options available. The most powerful is [Emacs](http://www.gnu.org/software/emacs). Emacs is fully programmable, and some users have taken advantage of its capabilities to develop a very sophisticated R development environment called [ESS](http://ess.r-project.org/).
 
 If you do a lot of coding, in R or other computer languages, it is worth investigating Emacs. You can install Emacs with ESS on Ubuntu very easily:
 
@@ -101,7 +101,7 @@ Which would you rather try and figure out?
 
 With a good editor, indentation is taken care of automatically. RStudio does an OK job of suggesting appropriate indentation. The main thing to keep in mind is making it easy on yourself and others to read through your code. 
 
-#### File management
+### File management
 
 I prefer to use two main files for my R development. I do most of my work in a 'working' script, which contains nearly everything I've tried. When I hit on an analysis that works the way I want it to, I transfer that code to my 'keeper' script, which contains just the good stuff. That way, when I return to the code at a later date, the keeper script contains the code I used to run the analysis in the paper, which is enough to repeat my work. If I need to make major changes or additions, the working script documents all my work, some of which may be useful in extending the code in the keeper script. I strongly recommend against having R save the workspace between sessions. You may save a bit of time in the short term, but it becomes a challenge to figure out what all the objects are - which ones are current, which ones are from out-dated work etc.
 

@@ -3,8 +3,7 @@
 
 ## Objectives:
 ## 1.  Writing your own functions
-## 2.  Control structures (if, for)
-## 3.  Writing packages
+## 2.  Control structures (if, for, etc)
 
 #######################
 ## Writing Functions ##
