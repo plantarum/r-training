@@ -289,3 +289,26 @@ text(Murder ~ Assault, data = USArrests, labels = row.names(USArrests))
 ## your script files to generate your plots - change one thing at a time
 ## and re-send the script, don't re-enter data each time you send a plot
 ## command! 
+
+
+###############
+## Exercises ##
+###############
+
+## using the airquality data set:
+
+## plot Wind agains Ozone
+plot(Wind ~ Ozone, data = airquality)
+
+## limit your plot to Wind less than 10
+plot(Wind ~ Ozone, subset(airquality, Wind <= 10))
+plot(Wind ~ Ozone, ylim = c(0, 10), airquality)
+
+## scale the size of points to Temp
+plot(Wind ~ Ozone, data = airquality, cex = 3 * scale(Temp))
+
+## modify the previous plot such that the color of the points is
+## different according to the Months variable
+plot(Wind ~ Ozone, data = airquality, cex = 3 * scale(Temp),
+     col = Month)
+

@@ -200,8 +200,7 @@ for(i in 1:10) {
 }
 
 ## A common use of for loops is to 'walk' across a vector or matrix. There are often
-## alternatives that produce faster code, but for is usually easier to figure out. (see
-## the help for apply, tapply, sapply etc for alternatives).
+## alternatives that produce faster code, but for is usually easier to figure out.
 
 set.seed(1)                                 # so we all get the same matrix
 mymat <- matrix(sample(1:100, 20), nrow = 5, ncol = 4)
@@ -214,6 +213,66 @@ for(i in 1:5) {
   }
 }
 
+## This is an example for illustration only. There is an easier way to
+## pull out each element in a matrix:
+
+as.numeric(mymat)
+
+## Compared to other languages, R has a reputation for being slow when
+## it comes to running for loops. If you can avoid them by using
+## vectorized operations, your code will be much faster. There are also
+## a number of functions available that give you cleaner ways to loop
+## over lists and matrices.
+
+## Some examples
+## column sums
+
+## with a for loop:
+res <- numeric(ncol(mymat))
+for (i in 1:ncol(mymat)){
+  res[i] <- sum(mymat[,i])
+}
+res
+
+## with apply:
+apply(mymat, MARGIN = 2, FUN = sum)
+
+## with the builtin colSums:
+colSums(mymat)
+
+## normalizing data
+
+## with a for loop:
+
+norm.mat <- mymat
+for (i in 1:ncol(mymat)){
+  tmp.mean <- mean(mymat[, i])
+  tmp.sd <- sd(mymat[, i])
+  norm.mat[, i] <- (mymat[,i] - tmp.mean)/tmp.sd
+}
+
+rm(tmp.mean, tmp.sd)
+
+norm.mat
+
+## with apply:
+apply(mymat, MARGIN = 2,
+      FUN = function (x) {
+        (x - mean(x)) / sd(x)
+      }
+      )
+
+## with scale:
+scale(mymat)
+
+## Key point:
+## 1. if there is a builtin to do what you need, use it!
+##      scale, colSums, sweep, rowSums
+## 2. if you can get apply to do what you need, use it!
+## 3. if you have to do something too complicated for apply, then make a
+##      for loop. 
+
+      
 ###############
 ## Exercises ##
 ###############
