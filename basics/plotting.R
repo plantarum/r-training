@@ -16,6 +16,12 @@
 ##################################
 ## Work flow for preparing figures
 
+
+
+####################
+## Basic plotting ##
+####################
+
 ## Start with a simple vector
 myvect <- 10:1
 
@@ -97,8 +103,8 @@ plot(myvect, main = "My plot", xlab = "Order")
 
 plot(myvect, xlab = "", ylab = "")
 
-## You can also turn off all labels with by setting the ann (for
-## annotation) argument to false:
+## You can also turn off all labels by setting the ann (for annotation)
+## argument to false:
 
 plot(myvect, ann = FALSE)
 
@@ -107,11 +113,57 @@ plot(myvect, ann = FALSE)
 ?par
 
 
+############################
+## Axis limits and Aspect ##
+############################
 
-## Discuss aspect along with xlim and ylim
-## Another key parameter of most plot types is the aspect,
-## specified by the asp option.
+## you can set the range of each axis with xlim and ylim:
 
-## Compare these two plots:
+smallnums <- seq(-1, 1, length.out = 10)
+bignums <- seq(-10, 10, length.out = 10)
+plot(smallnums, bignums)
 
-plot(myvect, myvect2)
+plot(smallnums, bignums, xlim = c(-5, 5))
+
+## If you want to use the same scale on both axes, set asp = 1:
+
+plot(smallnums, bignums, asp = 1)
+
+## This is important if the absolute distances between points is
+## meaningful, as in ordination plots!
+
+###########################
+## High-level Plot Types ##
+###########################
+
+hist(iris$Sepal.Length)
+
+boxplot(iris$Sepal.Length)
+boxplot(Sepal.Length ~ Species, data = iris)
+
+stripchart(Sepal.Length ~ Species, data = iris)
+stripchart(Sepal.Length ~ Species, data = iris, method = "jitter")
+stripchart(Sepal.Length ~ Species, data = iris, method = "jitter",
+           vertical = TRUE)
+
+## Dynamite plots?
+
+
+#################################
+## Adding Information to Plots ##
+#################################
+
+plot(Sepal.Length ~ Sepal.Width, data = iris)
+
+## pch = "plot character"
+
+plot(Sepal.Length ~ Sepal.Width, data = iris, pch = 1) # default
+plot(Sepal.Length ~ Sepal.Width, data = iris, pch = 2) # custom!
+
+plot(1:25, pch = 1:25)
+
+## can also be characters:
+
+plot(1:26, pch = letters)
+
+## Any numeric vector can be used to set values

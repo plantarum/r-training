@@ -1,3 +1,6 @@
+## Lesson 3: Data Input/Output
+## ==
+  
 ## Objectives:
 ## Using functions
 ## Loading data
@@ -18,9 +21,6 @@
 
 ## First, we need some data to scale:
 mymat <- iris[1:6, 1:4]
-
-## We'll learn what this code means in the next lesson. For now, just
-## know that we've extracted a small 6x4 subset of the iris data.frame.
 
 ## Now take a look at the help for scale:
 ?scale
@@ -102,6 +102,12 @@ rm(c(mymat.scaled, mymat))
 ## Loading data ##
 ##################
 
+## We'll start with a small table in csv format. csv is a useful, stable format for
+## passing data between applications. R can also deal with xls files, but it's a bit more
+## involved and trickier to transfer between OS.
+
+## Take a look at "mydata.csv" in MSExcel or LibreOffice Calc to see what we're dealing with
+
 ## R provides several functions for loading data files, all with many different options
 ## and defaults. We'll start with read.table(), which is the most general. First, open the
 ## help:
@@ -113,9 +119,11 @@ rm(c(mymat.scaled, mymat))
 
 mydf <- read.table("mydata.csv")
 
-## R is not happy! By default, R expects any whitespace values to be column separators.
-## In our data, only tabs separate data, so we need to tell R not to consider spaces or
-## other whitespace as field separators. We do this with the sep argument:
+## R is not happy! In particular, it found that the lines don't all have the same number
+## of elements. This usually means that R is using the wrong characters to separate
+## columns. By default, R expects any whitespace values to be column separators. In our
+## data, only tabs separate data, so we need to tell R not to consider spaces or other
+## whitespace as field separators. We do this with the sep argument:
 
 mydf <- read.table("mydata.csv", sep = "\t")
 
@@ -355,3 +363,18 @@ mydf
 ## frames, you'll have to find specialized functions for doing this. For example, the
 ## phylogenetic package ape provides functions for reading and writing nexus files and
 ## Newick trees.
+
+#####################
+## Recommendations ##
+#####################
+
+## 1. Enter your data in a spreadsheet or database program
+## 2. Export the spreadsheet to csv format
+##    **DO NOT make any further changes to your spreadsheet!**
+## 3. use read.table() to load the csv data into R
+## 4. check the data for any errors, and write a script to correct them
+## 5. keep your csv data and the correction script together in a directory
+## 6. if your analysis takes a lot of time, or generates complex objects, use save() to
+##    store objects.
+## 7. use write.table() to export data for use in other programs
+

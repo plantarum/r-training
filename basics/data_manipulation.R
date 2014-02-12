@@ -2,6 +2,7 @@
 ## ==
 
 ## Objectives:
+##
 ## Understand data types: numeric (integers), character, logical, factor
 ## Understand data structures: vector, matrix, data.frame, list
 ## Learn to manipulate data structures: filter, select, modify, combine
@@ -27,18 +28,6 @@
 pi
 1:10
 -16.4
-
-## Note: R does all calculates using high precision values, but by
-## default it truncates long decimals for the display:
-
-pi
-options(digits = 20) ## Display 20 digit precision
-pi
-options(digits = 7) ## Display 7 digit precision
-
-## You do not need to set digits to a high value to get high precision -
-## it only affects the way values are displayed, not how how they are
-## used in calculations!
 
 ##########
 ## Text ##
@@ -93,11 +82,67 @@ sum(myrand > 25)
 myfact = factor(c("exp", "control", "exp", "control"))
 myfact
 
-## Note that typing an object without an assignment into the console
-## simply prints its contents to the screen. It doesn't do anything
-## else. I add these lines throughout the lessons to remind you to
-## examine the contents of your objects to make sure you understand
-## what's inside them!
+##########
+## Note ##
+##########
+
+## Typing an object without an assignment into the console simply prints
+## its contents to the screen. It doesn't do anything else. I add these
+## lines throughout the lessons to remind you to examine the contents of
+## your objects to make sure you understand what's inside them!
+
+####################
+## Missing Values ##
+####################
+
+## `NA` is used to indicate a missing value. `NaN` means "not a number":
+
+sqrt(-1)
+
+## and -Inf and Inf are negative and positive infinity:
+-1/0
+1/0
+
+#####################################
+## Converting between object types ##
+#####################################
+
+## There are a group of functions available to convert objects from one
+## class to another:
+
+## as.character() -> converts numerics or factors to text:
+## --
+
+as.character(myfact)
+as.character(1:3)                       # Note the quotes around the numbers!
+
+## as.numeric -> converts factors and characters to numeric:
+## --
+char.nums <- c("1", "20", "5")
+as.numeric(char.nums)
+
+as.numeric(myfact)
+
+## Note that factors are actually stored as two components - an integer
+## value, and a 'level' for each value. So when you covert to numeric,
+## you lose the 'levels' and just get the integer value back.
+
+as.numeric(c('dog', 'cat', 'mouse'))
+
+## Not possible!
+
+## as.factor -> converts factors and numerics to categorical values
+## --
+
+as.factor(char.nums)
+
+## as.logical -> converts to logical
+## --
+
+as.logical(-2:2)                        # 0 is false, otherwise true!
+as.logical(c("TRUE", "FALSE"))          # ok
+as.logical(c("T", "F"))                 # ok
+as.logical(c("cat", "dog"))             # not ok!
 
 #############
 ## Vectors ##
@@ -134,25 +179,31 @@ sqrt(numvect)
 ## You can also combine vectors using mathematical operations:
 
 vect1 = 1:4
-vect2 = c(10, 20, 30, 40)
+vect10 = c(10, 20, 30, 40)
 
-vect1 + vect2
+vect1 + vect10
 
 ##############
 ## WARNING! ##
 ##############
 
 ## R will let you combine vectors of different lengths. It will do this
-## by 'recycling' values in the shorter vector. You will usually get a
+## by 'recycling' values in the shorter vector. You will often get a
 ## warning when this happens, because it's probably not want you
 ## intended to do!
 
 vect3 = 1:3
 
-vect1 + vect3
+vect3 + vect10
+
+## Another example of recycling:
+paste(letters[1:7], vect3, sep = ":")
+
+################
+## Subsetting ##
+################
 
 ## You can select only part of a vector with the square brackets:
-
 ## Select the 17th letter:
 letters[17]
 
@@ -195,6 +246,7 @@ numvect
 
 numvect[3]
 
+## Note that you can use subsets to change one value in a vector:
 numvect[3] <- 5
 
 numvect
@@ -310,6 +362,18 @@ mydf <- data.frame(site = c("forest", "field", "stream", "bog"),
 mydf$pH
 mydf$diversity
 
+## Most high-level analysis functions operate on data frames. You can
+## convert a matrix to a data frame with:
+
+as.data.frame(my.mat)
+
+## Data frames can also be converted to matrices:
+
+as.matrix(mydf)
+
+## However, if your data frame contains more than one class of value,
+## the conversion to matrix can include out transformations!
+
 ###########
 ## Lists ##
 ###########
@@ -366,6 +430,8 @@ mylist[[1]]
 ## 'iris':
 
 iris
+
+## More detail is provided in ?iris
 
 ## Start by looking at the Species column on its own:
 
