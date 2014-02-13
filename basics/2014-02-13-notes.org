@@ -1,0 +1,68 @@
+
+* Tech Support
+  Leaving files on github is not great for accessibility in a room with spotty internet
+  connection and students without git installed! Distribution of the .zip archive ahead of
+  time would be easier to support
+
+* Intro presentation
+  - Ok, not too long. Could be tighter & shorter to allow more time for R
+
+* RStudio introduction
+  - brief
+  - could be longer, as there are many great features in the ide
+  - however, most of those features only make sense as you become familiar with R
+  - best approach is probably to stick with a very cursory introduction, then do short
+    excursions to explore useful features through the day
+
+* Data manipulation
+  - most overwhelming part of the day
+  - could be broken up with more exercises, break things down into smaller pieces and
+    repeat, to make a slower build up
+  - on the other hand, the next section went smoother, so perhaps a painful introduction
+    is unavoidable, and not necessarily detrimental to the progress of the day as a whole?
+ 
+* Input-output
+  - after the awkward progress through data manipulation, people started clicking here.
+    This material builds on the previous well, with enough repetition of the subsetting
+    and selection functions to tie it together and reinforce the stuff that was originally
+    very hard to grasp
+  - The explanation of functions should maybe be moved up in the schedule. It was really
+    helpful to go over that material. Adding it to the data manipulation module might have
+    taken some of the rough edges off of that bit. In particular, c() is a bit of a
+    magical black box without an understanding of functions.
+
+* Package Management
+  - short, just a cursory overview. A little awkward without being able to conveniently
+    access the websites to show off what's available, or even download and install
+    something live. Perhaps best moved to a powerpoint with screenshots of the website -
+    quicker and easier to provide as a reference document afterwards.
+
+* Plotting
+  - Too much of me talking, not enough exercises to work through. Would be great to have
+    people use their own data here.
+
+* Functions
+  - Ok, reasonable short introduction. Longer examples might be useful, but perhaps a hard
+    sell unless they actually do something useful to the students. There's a limit to the
+    enthusiasm for toy examples.
+    
+* New Format Possibility
+    1. Data manipulation, possibly including a bit on functions
+
+    2. Input-output, more or less as-is
+
+    3. Project 1 - load your own data (get some sample data sets to use for folks without)
+
+    4. Package Management powerpoint
+
+    5. Brief plotting overview
+
+    6. Project 2 - plot your own data
+
+    7. Writing your own functions (time permitting)
+
+** Comments
+
+   - more immediately relevant to users
+   - challenge is dealing with very heterogeneous ability levels compounded by different
+     data types/formats etc.
