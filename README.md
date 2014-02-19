@@ -4,7 +4,8 @@ r-training
 Tutorials and data for use in R training courses
 ----
 
-(c) Tyler William Smith, 2014
+(c) Tyler William Smith, 2014.
+
 All material is licensed under the Creative Commons Attribution 4.0
 International license. I would appreciate you sending me an email if you
 use this in your own classes, particularly if you have any comments or
@@ -14,12 +15,13 @@ criticisms to share.
 ### basics
 
 This is material for a one-day introduction to R:
-    1. first_session.Rmd
-    2. data_manipulation.R
-    3. input-output.R
-    4. package_management.Rmd
-    5. plotting.R
-    6. r-programming.R
+
+1. first_session.Rmd
+2. data_manipulation.R
+3. input-output.R
+4. package_management.Rmd
+5. plotting.R
+6. r-programming.R
 
 The R script files are designed to be worked through as a group,
 alternating between me demonstrating different things, and the students
