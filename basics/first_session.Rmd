@@ -184,7 +184,7 @@ All of the variables you've created are temporarily stored in your workspace (te
 
 You can list all of the objects in your current environment with `ls()`:
 
-```{R, eval = FALSE}
+```{r, eval = FALSE}
 ls()
 ```
 
