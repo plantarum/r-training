@@ -113,9 +113,6 @@ documentation. Roger Peng has also posted a very nice introductory
 \href{https://www.youtube.com/watch?v=HeqHMM4ziXA\&feature=youtube\_gdata\_player}{video on
   YouTube}.
 
-At this point, \texttt{lattice} has pretty much been displaced by \texttt{ggplot2}, although you may
-like to check it out too.
-
 \section{Preliminaries}
 
 For this example, we'll use the guidelines provided by the
@@ -397,7 +394,7 @@ par(mar = c(3, 3, 0.5, 0.5))
 @ 
 
 Unfortunately, each figure is plotted on different scales, so placing the letters in the same
-position is not straightforward. Luckily, R provides a function for getting 'universal' coordinates
+position is not straightforward. Luckily, R provides a function for getting `universal' coordinates
 for every plot. 
 
 <<panel-a-label-2, eval = FALSE>>=
@@ -416,9 +413,12 @@ text("B", x = grconvertX(0.9, from="npc", to="user"),
 The functions \texttt{grconvertX} and \texttt{grconvertY} convert between different coordinate
 systems. \texttt{npc} is ``normalized plot coordinates''. In this system, (0, 0) is the lower left
 corner of the plot, and (1, 1) is the upper right corner. \texttt{user} coordinates are the actual
-scales used in each figure. So \texttt{grconvertX(0.9, from = "npc", to = "user")} returns the X
-coordinate to plot our text 90\% of the way to the left side of the plot, regardless of the scale
-used in that plot. With this addition, we have the following code, and the generated panels:
+scales used in each figure. \texttt{user}, on the other hand, is the coordinate system in effect for
+the actual plotted data. Which, for our Panel A, means the lower right corner is ca. (2.0, 4.0) and
+the upper left corner is ca. (4.5, 8.5). So \texttt{grconvertX(0.9, from = "npc", to = "user")}
+returns the X coordinate to plot our text 90\% of the way to the left side of the plot, regardless
+of the scale used in that plot. With this addition, we have the following code, and the generated
+panels:
 
 
 <<panel-final, eval=FALSE>>=
@@ -447,7 +447,7 @@ There are still a few problems with our panel:
 
 If you change \texttt{ylim}, you can put the legend on the bottom, and make space for the label at
 the top. Go ahead and see what you can do with this. You can use my example, Figure
-\ref{fig:final-product} as a model. Alternatively, try formatting your own data according to the
+\ref{fig:final-product}, as a model. Alternatively, try formatting your own data according to the
 requirements of a journal in your field.
 
 \section{Image Formats}
