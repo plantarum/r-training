@@ -36,3 +36,9 @@ indicated what some of the rougher parts are so far.
 A new lesson featuring a walk-through of the process I use for preparing
 publication-ready figures using the base R graphics system.
 
+### r-markdown
+
+An overview of Reproducible Research, and a workflow for achieving it
+with R, Markdown and RStudio. Primarily a lecture, with material
+repurposed from Roger Peng's Coursera material:
+https://github.com/rdpeng/courses
