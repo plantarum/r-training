@@ -1,0 +1,320 @@
+Reproducible Research with R
+========================================================
+author: Tyler Smith
+date: February 20, 2014
+
+Overview
+========================================================
+
+- What is reproducible research?
+- Setting up a RR project
+- Using R Markdown and knitr
+
+Acknowledgements
+===
+
+This presentation uses material prepared by Roger D. Peng, including two of his images and a lot of knitr slides. Source:
+
+https://github.com/rdpeng/courses
+
+https://www.coursera.org/specialization/jhudatascience/1
+
+Dr. Peng's material and this presetnation may be shared, subject to the Creative Commons Attribution NonCommercial ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-nc-sa/4.0/deed.en_GB).
+
+
+Motivation
+========================================================
+incremental: true
+
+- years of data collated in an Excel sheet
+- data cleaned & corrected in Excel
+    + data1.xls, data2.xls, data07.xls ...
+- analysis spread across multiple programs, different parameters
+    + analysis1.txt, analysis2.stat, final.an.R, real-final.an.R
+- files scattered across several folders/computers
+
+Motivation 
+====================================================
+incremental: true
+
+- six months later: collaborators finally send you their data;
+  you need to revise the analysis 
+- a year later: reviewer requests changes
+- 3 years later: you complete a follow-up study, need to
+revisit analysis
+
+> Which data?  
+> Which analysis?  
+> Which files?
+  
+
+Reproducible Research: Definition
+========================================================
+
+- true replication is rarely feasible
+    + collecting data is difficult & expensive
+- given the same raw data, we need to be able to easily examine and reproduce the analysis
+
+
+===
+![](./peng/RR-research-pipeline-1.jpg)
+
+
+===
+![](./peng/RR-research-pipeline-2.jpg)
+
+Requirements
+===================================
+incremental: true
+
+- data are available
+- code is available
+- code and data are documented
+- code, data and documentation are stored in a format that enables storage & distribution
+
+
+Getting Started
+===
+incremental: true
+
+- keep your project in one directory
+  + more complex may require nesting
+  + monophyletic structure is best!
+- use relative file names for portability
+    + bad: C:\Documents\Tyler\project1\myfile.txt
+    + good: .\myfile.txt
+
+Processing Data
+===
+- clean & process your data with scripts, not GUIs
+
+```{r, eval=FALSE}
+mydat <- read.table("2014-02-20_data.csv")
+
+## Correct pH data
+mydat$pH[mydat$pH == 0] <- NA
+
+## exclude rows with missing data:
+mydat <- mydat[ , complete.cases(mydat)]
+
+## exclude sample 67, failed reaction:
+mydat <- subset(mydat, rownames(mydat) != "samp67")
+```
+
+Processing Data
+===
+incremental: true
+
+- Permanent audit trail
+    + what did you do, why you did it
+    + reversing your actions is possible & straightforward
+
+Getting Started
+===
+
+- keep your project in one directory
+- use relative file names for portability
+- clean & process your data with scripts, not GUIs
+- keep analytic code and data together
+- **link analytic code and presentation**
+    + _eliminate cutting & pasting_
+    + literate programming
+
+Literate Programming
+===
+incremental: true
+
+- one document contains text and code
+- from this single source:
+    + extract code
+    + extract text
+    + compile code weave results into text
+
+knitr
+===
+
+- R package written by Yihui Xie
+    + available on CRAN, integrated with RStudio
+- Supports mixing R code and markup languages like HTML, LaTeX and Markdown
+- Export to PDF, HTML (-> .doc), .R
+
+knitr Requirements
+===
+
+- a recent version of R
+- RStudio (any text editor will do, RStudio is easiest to start with)
+- understanding of Markdown (which you'll soon have!)
+
+Markdown
+===
+
+- a very simple markup language
+- described in the RStudio Help -> Markdown Quick Reference
+
+===
+
+![](./peng/knitr-13.jpg)
+
+
+===
+
+![](./peng/knitr-14.jpg)
+
+
+===
+
+![](./peng/knitr-15.jpg)
+
+More Complicated Way
+===
+Without RStudio, you can convert your file from within `R`:
+
+```{r, eval=FALSE}
+library(knitr)
+knit2html("document.Rmd")
+```
+
+This generates `document.html` which you can open in a web browser
+
+
+===
+
+![](./peng/knitr-17.jpg)
+
+
+===
+
+![](./peng/knitr-18.jpg)
+
+Notes
+===
+
+- RStudio will pre-fill your `knitr` document with a template. You can delete this.
+- Code chunks begin with `` `r '\x60 \x60 \x60{r}'` `` and   
+end with `` `r '\x60 \x60 \x60'` `` (no spaces!)
+- R code goes between the markers
+- chunks can be named & reused
+- By default the code and its result are displayed, but you can turn off either or both for each chunk
+
+How knitr Works
+===
+incremental: true
+
+- you write the R Markdown document (`.Rmd`)
+- `knitr` converts this to Markdown (`.md`)
+- `knitr` converts this to HTML (`.html`)
+
+      `.Rmd` -> `.md` -> `.html`
+
+- you should only edit the `.Rmd` file!
+
+===
+
+![](./peng/knitr-21.jpg)
+
+===
+
+![](./peng/knitr-22.jpg)
+
+===
+
+![](./peng/knitr-23.jpg)
+
+===
+
+![](./peng/knitr-24.jpg)
+
+===
+
+![](./peng/knitr-25.jpg)
+
+===
+
+![](./peng/knitr-26.jpg)
+
+===
+
+![](./peng/knitr-27.jpg)
+
+===
+
+![](./peng/knitr-28.jpg)
+
+===
+
+![](./peng/knitr-29.jpg)
+
+===
+
+![](./peng/knitr-30.jpg)
+
+===
+
+![](./peng/knitr-31.jpg)
+
+Global Options
+===
+- you can change the defaults for every chunk at once
+    + e.g., suppress all code echoing
+- after you change the default values, you can switch them back for individual code chunks
+
+===
+
+![](./peng/knitr-33.jpg)
+
+===
+
+![](./peng/knitr-34.jpg)
+
+Interacting with R
+===
+- you can still pass code from your `.Rmd` file to the `R` interpreter
+- allows you to explore your data while you prepare the document
+
+Summary
+===
+
+In a single directory you create:
+`mydata.csv`
+--
+
+- raw, unedited data
+
+`myanalysis.Rmd`
+--
+- complete analysis
+
+Summary
+===
+From this source you can generate:
+
+`myanalysis.html` or `myanalysis.pdf`
+--
+- a single document that captures your entire project
+- open `html` in Word for formatting for submission
+
+
+`myanalysis.zip`
+-- 
+- containing `mydata.csv` and `myanalysis.Rmd`, which you can then send to colleagues - they can then repeat your entire analysis with ease
+
+
+Application
+===
+
+Immediately useful for documenting analysis projects.
+- unpublished reports
+- student assignments
+- tutorials, lecture slides & notes
+- analysis to be added to manuscripts
+    + `html` -> `doc`, new starting point for a paper
+
+Application
+===
+
+Alternatively, `knitr` can process LaTeX documents
+- incorporate `bibtex` files for references
+- complete manuscript preparation system
+    + many journals still require conversion to `doc` prior to submission
+    + some suggest LaTeX is the domain of weirdos
+
