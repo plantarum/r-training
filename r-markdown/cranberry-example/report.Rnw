@@ -1,0 +1,330 @@
+\documentclass{article}
+\usepackage{tgschola} % current favourite
+\usepackage[T1]{fontenc} % required with font packages
+\usepackage{DejaVuSansMono}           % font for code
+\usepackage[section]{placeins}
+\usepackage{natbib}
+\bibpunct{(} {)} {;} {a} {} {,}
+\usepackage[margin=1in]{geometry}
+
+\title{Morphometric Analysis of \emph{Vaccinium oxycoccos}}
+
+\begin{document}
+
+\maketitle{}
+
+<<formatting,include=FALSE>>=
+options(replace.assign=TRUE, width=68)
+opts_chunk$set(tidy = FALSE)
+@ 
+
+\section{Overview}
+
+This is a summary of the analysis I have performed on Charlotte's data.
+I have also included data from a previous study by Suda \& Lysak, so
+that we will be able to make direct comparisons. I have included all of
+the code I used in the analysis. This is mostly as a permanent record
+for myself, I don't expect Charlotte to follow the code. I have included
+a very brief explanation of the stats involved, and will go over them in
+more detail with Charlotte in person.
+
+\section{Preliminaries}
+
+<<setup>>=
+## loads & pre-process data files:
+source("honours-load.R") 
+library(vegan)
+library(MASS)
+## loads Suda's data as suds.oxy
+dim(suds.oxy)
+## loads Charlotte's data as cran.combo
+dim(cran.combo)
+@ 
+
+Jan Suda has shared his data from his morphological work
+\citep{suda_lysak_2001}. The details are provided in that paper. I have
+repeated his analysis after excluding \emph{Vaccinium macrocarpon}, to
+make it directly comparable to Charlotte's data. This leaves 1177
+individuals in Suda's data set, which ought to be enough for anyone.
+
+Not all of the variables in Suda's study mapped directly to variables
+that Charlotte collected, so I trimmed it down to 19 variables shared
+between both (all measurements in mm):
+
+\begin{description}
+\item[leaf\_l:] leaf length
+\item[leaf\_w:] leaf width 
+\item[dist\_to\_widest\_leaf:] distance from leaf base to widest point
+\item[w\_non\_revoluted\_leaf:] width of leaf, excluding the revolute edges
+\item[petal\_l:] petal length
+\item[petal\_w:] petal width
+\item[stamen\_l:] stamen length, from the base to the end of the tubules
+\item[tubules:] length of tubules on anthers
+\item[style\_l:] length of style
+\item[bract\_l:] length of bract at the midpoint of the pedicel
+\item[leaf\_shape:] length of leaf / width of leaf
+\item[rev\_prop:] width of revolute part of leaf / total width of leaf
+  (proportion) 
+\item[leaf\_sym:] distance from leaf base to widest point / length of leaf
+\item[petal\_shape:] length of petal / width of petal
+\item[sepal\_shape:] length of sepal / width of sepal
+\item[anther\_l\_no\_tubules:] length of anthers, excluding tubules
+\item[anther\_l\_tubules:] length of anthers including tubules
+\item[anther\_tub:] length of anther / length of tubules
+\item[pedicel\_l:] length of pedicel
+\end{description}
+
+\texttt{anther\_l\_tubules} is a linear combination of \texttt{tubules}
+and \texttt{anther\_l\_no\_tubules}, so it should also be excluded:
+
+<<trim-variables>>=
+suds.oxy <- suds.oxy[, ! colnames(suds.oxy) %in% "anther_l_tubules"]
+cran.combo <- cran.combo[, ! colnames(cran.combo) %in% "anther_l_tubules"]
+dim(suds.oxy)
+dim(cran.combo)
+@ 
+
+\section{Analysis: European Data}
+
+\subsection{Unconstrained ordination}
+
+Unconstrained ordination is a dimension-reducing technique. In our case,
+the data has 18 dimensions (one for each variable), which is too much to
+consider at once. So we use an ordination to extract the most
+interesting information in the data and present it in two dimensions.
+This involves some fancy math, but the result is very intuitive. We'll
+go over this in person. In this case, we'll use Principal Co-ordinates
+Analysis (PCoA):
+
+<<suda-pcoa,cache=TRUE>>=
+suds.oxy.gow <- sqrt(vegdist(suds.oxy, method = "gower", na.rm = TRUE))
+suds.oxy.pcoa <- cmdscale(suds.oxy.gow, k = nrow(suds.oxy) - 1, eig = TRUE)
+suds.oxy.pcoa$eig[1:5] / sum(suds.oxy.pcoa$eig)
+## Record eigenvalues for use in plot labels:
+ax1 <- 100 * suds.oxy.pcoa$eig[1] / sum(suds.oxy.pcoa$eig)
+ax2 <- 100 * suds.oxy.pcoa$eig[2] / sum(suds.oxy.pcoa$eig)
+@ 
+
+We use the Gower distance, as it allows us to include variables with
+missing values. Suda's data is very complete, but there are some missing
+values in Charlotte's data. The warning here relates to the fancy math,
+and we can ignore it in this case.
+
+\begin{figure}
+  \centering
+<<suda-pcoa-plot,fig.height=4.5,fig.width=5>>=
+plot(suds.oxy.pcoa$points, asp = 1, col = suds.oxy.code, 
+     xlab = paste("PCoA Axis 1, ", round(ax1, 1), 
+       "% of total variance", sep = ""), 
+     ylab = paste("PCoA Axis 2, ", round(ax2, 1), 
+       "% of total variance", sep = ""), cex.axis = 0.6, cex.lab = 0.75)
+@ 
+\caption{PCoA plot of Vaccinium oxycoccos samples from central Europe.
+  Red circles are diploid plants. Other colours are polyploids
+  (4-6$\times$)} 
+  \label{fig:suda-pcoa}
+\end{figure}
+
+Figure \ref{fig:suda-pcoa} presents all 18 morphological variables,
+condensed onto two dimensions. In this view, it is clear that there is a
+break between the diploids and the polyploids, but the polyploids
+are all jumbled together. This was what Suda \& Lysak concluded in their
+paper -- the diploids are morphologically distinct from the polyploids,
+but the different polyploids are essentially indistinguishable. 
+
+\FloatBarrier
+
+\subsection{Constrained ordination}
+
+Constrained ordination is an extension of the approach we just used. We
+are going to reduce the dimensionality of our data, but we're going to
+be a little more sophisticated about it. An unconstrained ordination
+puts as much of the total variation as possible on the first two
+dimensions (subject to some constraints). A constrained ordination, in
+this case linear discriminants analysis (LDA), also maximizes the amount of
+variation on the first few dimensions. However, it's not the total
+variation in the data, but instead the variation that explains
+differences between pre-defined groups.
+
+In this case, Suda \& Lysak had a complete flow-cytometry data set for
+their data. So they already knew which plants were diploid and which
+were polyploid. They used that information, and conducted an LDA to
+determine if a) they could distinguish between the different ploidy
+levels using morphological variables and b) they could identify which
+variables were most useful in discriminating among them. Their paper
+included \emph{V. macrocarpon}. I repeated the analysis using just two
+groups, diploid and polyploid \emph{V. oxycoccos}.
+
+LDA has a few more requirements than PCoA. We can't have any missing
+values, and we can't use variables that are highly correlated. 
+
+<<suda-lda-code>>=
+  ## remove highly correlated variables
+suds.lda.dat <- suds.oxy[,! colnames(suds.oxy) %in% 
+                         c("dist_to_widest_leaf", "w_non_revoluted_leaf", 
+                           "stamen_l", "anther_l_tubules", "sepal_shape")]
+## remove samples with missing values
+suds.oxy.complete <- suds.lda.dat[complete.cases(suds.lda.dat),]
+suds.oxy.code.complete <- suds.oxy.code[complete.cases(suds.lda.dat)]
+## store a vector of which samples are diploids and which are polyploids
+suds.diploid <- as.numeric(suds.oxy.code.complete == 2) + 1
+## run the lda:
+suds.lda <- lda(scale(suds.oxy.complete), grouping=suds.diploid)
+suds.pred <- predict(suds.lda)
+suds.manova <- manova(scale(suds.oxy.complete) ~ suds.diploid)
+summary(suds.manova, "Wilks")
+@ 
+
+The results show a highly-significant difference among groups. Since we
+are evaluating the variation between two groups, there is only one axis
+in our LDA ordination. Plotting the values of diploids and polyploids on
+this axis, again we see a very clear division into two discrete groups
+(Fig. \ref{fig:suda-lda}).
+
+\begin{figure}[h]
+  \centering
+<<suda-lda-plot,fig.width=5,fig.height=3>>=
+stripchart(suds.pred$x, method = "jitter", jitter = 0.1, pch = 1, 
+           col = "white", xlab = "Discriminant Function Score", 
+           cex.lab = 0.75, cex.axis = 0.6)
+points(x = suds.pred$x, y = jitter(rep(1, length(suds.pred$x)), amount = 0.2), 
+       col = suds.diploid)
+@   
+  \caption{Discriminant Analysis of European \emph{Vaccinium oxycoccos}
+    samples. Black circles are polyploids, red circles are diploids.}
+\label{fig:suda-lda}
+\end{figure}
+
+The LDA also provides us with a measure of which variables are most
+important in separating the two groups:
+
+<<suds-lda-coef>>=
+coef(suds.lda)
+@ 
+
+The largest absolute values in this list are the variables that are most
+important in discriminating between the two groups. Variables with
+negative coefficients indicate a relationship with group 1, (the
+polyploids), and positive coefficients are related to group 2 (the
+diploids). So the most important variable in this analysis is tubule
+length, which is greatest for polyploids. The next most important
+variable is the ratio of anther length / tubule length, which is also
+largest in polyploids. Petal length is the third most important, and
+petal shape is the fourth. Petal shape is largest in diploids.
+
+These results are similar, but not identical, to the results in
+\citet{suda_lysak_2001}. This is because I've used the same general
+approach, but with a different subset of their samples and variables.
+
+\FloatBarrier
+
+\section{Analysis: Canadian data}
+
+\subsection{Unconstrained ordination}
+
+I repeated Suda \& Lysak's analysis so we could have a direct comparison
+with Charlotte's data. Here is the PCoA of her data:
+
+<<char-pcoa>>=
+cran.gow <- sqrt(vegdist(cran.combo, method = "gower", na.rm = TRUE))
+cran.pcoa <- cmdscale(cran.gow, k = nrow(cran.combo) - 1, eig = TRUE)
+cran.pcoa$eig[1:5] / sum(cran.pcoa$eig)
+## Record eigenvalues for use in plot labels:
+ax1 <- 100 * cran.pcoa$eig[1] / sum(cran.pcoa$eig)
+ax2 <- 100 * cran.pcoa$eig[2] / sum(cran.pcoa$eig)
+@ 
+
+\begin{figure}
+  \centering
+<<char-pcoa-plot,fig.height=4.5,fig.width=5>>=
+plot(cran.pcoa$points, asp = 1, col = ploidy, pch = c(16, 2, 4)[ploidy],
+     cex = c(0.75, 1.5, 1.5)[ploidy],
+     xlab = paste("PCoA Axis 1, ", round(ax1, 1), 
+       "% of total variance", sep = ""), 
+     ylab = paste("PCoA Axis 2, ", round(ax2, 1), 
+       "% of total variance", sep = ""), cex.axis = 0.6, cex.lab = 0.75)
+@ 
+\caption{PCoA plot of \emph{Vaccinium oxycoccos} samples from Canada.
+  Red triangles are diploid plants, green 'X' are tetraploids; the
+  ploidy of plants plotted as black dots is unknown (so far).} 
+  \label{fig:char-pcoa}
+\end{figure}
+
+Figure \ref{fig:char-pcoa} shows that there is no clear morphological
+separation between diploids and polyploids in Charlotte's data. With our
+limited ploidy data, it appears that the diploids may be at one end of a
+morphological gradient, but there is no clear demarcation evident
+anywhere in the plot.
+
+\FloatBarrier
+
+\subsection{Constrained ordination}
+
+We don't yet have a full flow cytometry dataset to complete the same
+LDA that Suda \& Lysak did in their study. However, we can use their
+data to see if it provides a better discrimination of our samples. Part
+of an LDA is building a linear model that can be used to predict which
+groups new samples should be placed in. Since they have a much bigger
+data set, with a flow-cytometry counts for every sample, we can
+piggy-back on their work to see if it clarifies our own data.
+
+<<char-lda-prep>>=
+## remove correlated variables:
+cran.lda.dat <- cran.combo[, ! colnames(cran.combo) %in%
+                           c("dist_to_widest_leaf",
+                           "w_non_revoluted_leaf", "stamen_l", 
+                           "anther_l_tubules", "sepal_shape")]  
+## Remove samples with missing values:
+cran.lda.comp <- cran.lda.dat[complete.cases(cran.lda.dat), ]
+dim(cran.lda.comp)
+## recalculate list of known ploidy values:
+lda.ploidy <- ploidy[complete.cases(cran.lda.dat)]
+## Run the analysis:
+cran.lda.pred <- predict(suds.lda, scale(cran.lda.comp))
+@ 
+
+With the analysis complete, we can now visually compare the placement of
+Charlotte's samples with the model generated by Suda \& Lysak (Figure
+\ref{fig:combined-lda}). Once again, we see that the stories don't line up.
+
+\begin{figure}
+  \centering
+<<combined-lda-plot,fig.height=4>>=
+stripchart(suds.pred$x ~ suds.diploid, method = "jitter", jitter = 0.1, 
+           pch = 1, col = "white", group.names = c("European", "Canadian"), 
+           xlab = "Discriminant Function Score")
+points(x = suds.pred$x, y = jitter(rep(1, length(suds.pred$x)), amount = 0.1), 
+       col = c(3,2)[suds.diploid])
+points(x = cran.lda.pred$x, col = lda.ploidy, pch = c(16, 2, 4)[lda.ploidy], 
+       y = jitter(rep(2, length(cran.lda.pred$x)), amount = 0.1), 
+       cex = c(0.75, 1.5, 1.5)[lda.ploidy])
+@ 
+  
+  \caption{Application of European \emph{Vaccinium oxycoccos} discriminant
+    model to Canadian samples. Green symbols are polyploids, red symbols
+    are diploids, black symbols are unknown ploidy.}
+  \label{fig:combined-lda}
+\end{figure}
+
+\section{About this document}
+This analysis was completed using the R programming language. All the
+code is included in this document. If you wish to reproduce the
+analysis, you will need the following files:
+
+\subsection*{Required files}
+\begin{description}
+\item [\texttt{report.Rnw}:] the source file
+\item [\texttt{honours-load.R:}] R code to load the data
+\item [\texttt{charlotteJan31.csv}:] Charlotte's data
+\item [\texttt{suda\_lysak.csv:}] Suda's data
+\item [\texttt{cran.bib}:] Tyler's bibliography database (contains one example entry only)
+\end{description}
+
+The source for this file, \texttt{report.Rnw}, can be processed with
+\texttt{knitr} and \LaTeX{}.
+
+\FloatBarrier
+\bibliographystyle{plainnat}
+\bibliography{cran}
+
+\end{document}
