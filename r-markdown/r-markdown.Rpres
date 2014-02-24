@@ -13,13 +13,12 @@ Overview
 Acknowledgements
 ===
 
-This presentation uses material prepared by Roger D. Peng, including two of his images and a lot of knitr slides. Source:
+This presentation uses material prepared by Roger D. Peng:
 
-https://github.com/rdpeng/courses
-
+https://github.com/rdpeng/courses  
 https://www.coursera.org/specialization/jhudatascience/1
 
-Dr. Peng's material and this presetnation may be shared, subject to the Creative Commons Attribution NonCommercial ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-nc-sa/4.0/deed.en_GB).
+Creative Commons Attribution NonCommercial ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-nc-sa/4.0/deed.en_GB).
 
 
 Motivation
@@ -29,7 +28,7 @@ incremental: true
 - years of data collated in an Excel sheet
 - data cleaned & corrected in Excel
     + data1.xls, data2.xls, data07.xls ...
-- analysis spread across multiple programs, different parameters
+- analysis spread across multiple programs
     + analysis1.txt, analysis2.stat, final.an.R, real-final.an.R
 - files scattered across several folders/computers
 
@@ -37,7 +36,7 @@ Motivation
 ====================================================
 incremental: true
 
-- six months later: collaborators finally send you their data;
+- six months later: collaborators send you their data;
   you need to revise the analysis 
 - a year later: reviewer requests changes
 - 3 years later: you complete a follow-up study, need to
@@ -50,11 +49,10 @@ revisit analysis
 
 Reproducible Research: Definition
 ========================================================
+    
+> Reproducible research involves the careful, annotated preservation of data, analysis code, and associated files, such that statistical procedures, output, and published results can be directly and fully replicated.
 
-- true replication is rarely feasible
-    + collecting data is difficult & expensive
-- given the same raw data, we need to be able to easily examine and reproduce the analysis
-
+http://ropensci.org/blog/2014/02/20/dvn-dataverse-network/
 
 ===
 ![](./peng/RR-research-pipeline-1.jpg)
@@ -93,10 +91,8 @@ mydat <- read.table("2014-02-20_data.csv")
 
 ## Correct pH data
 mydat$pH[mydat$pH == 0] <- NA
-
 ## exclude rows with missing data:
 mydat <- mydat[ , complete.cases(mydat)]
-
 ## exclude sample 67, failed reaction:
 mydat <- subset(mydat, rownames(mydat) != "samp67")
 ```
@@ -116,6 +112,10 @@ Getting Started
 - use relative file names for portability
 - clean & process your data with scripts, not GUIs
 - keep analytic code and data together
+
+Getting Started
+===
+
 - **link analytic code and presentation**
     + _eliminate cutting & pasting_
     + literate programming
