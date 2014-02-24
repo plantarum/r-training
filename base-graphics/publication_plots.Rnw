@@ -93,8 +93,8 @@ You will need:
 \begin{itemize}
 \item A recent version of R installed on your computer
 \item Familiarity editing R scripts and passing commands from a script to the R interpreter
-\item RStudio \textbf{will not} work for this lesson, due to limitations in how it processes
-  plotting commands; the default RGui installed on Windows or Mac will work fine
+\item RStudio \textbf{is not ideal} for this lesson, due to limitations in how it processes plotting
+  commands; the default RGui installed on Windows or Mac will work better
 \item The pdf notes for lesson (which you are now reading!)
 \item The \texttt{plotting-script.R} script, opened in your script editor
 \item Optionally, some of your own data to work with during the exercises
@@ -129,8 +129,12 @@ The figure we'll plot is from the built-in \texttt{iris} data set. We'll do a si
 Let's start with a square. If we need more height, we can increase the size as necessary. Similarly,
 if we decide we need to stretch our figure over two columns, we can change later.  
 
-\textbf{Note that we can't use RStudio for this exercise.} Unfortunately, it's not possible to
-create new plot windows in RStudio, so you'll have to use another editor for this.
+\textbf{Note that RStudio isn't the best environment for this exercise.} Unfortunately, it's not
+possible to create new plot windows in RStudio, so you can't specify the dimensions of the figure
+for the on-screen display. Consequently, when you save your figure to an image file, you won't
+necessarily get exactly what you see on the screen. In many cases, this may well be fine. But
+double-check the image file to make sure that you get what you expected. If you didn't, it may be
+because the on-screen display and the saved image were not close enough to the same dimensions.
 
 To set up the canvas for our plot, start a new device:
 
@@ -138,9 +142,39 @@ To set up the canvas for our plot, start a new device:
 dev.new(height = 3.5, width = 3.5)
 @ 
 
+If you are using RStudio, `dev.new()` won't work. Instead, drag the edges of the plot window to get
+as close to a 3.5"square as possible.
+
 \section{Content}
 
 Now that our canvas is ready, we can start placing our graphics. Let's start with the default plot.
+
+<<iris-fig-default-source, eval=FALSE>>=
+plot(Sepal.Length ~ Sepal.Width, data = iris)
+@ 
+
+<<iris-fig-default, fig.height= 3.5, fig.width=3.5, fig.align ="center", echo = FALSE, purl=FALSE>>=
+par(bg="#FCFCFC")
+plot(Sepal.Length ~ Sepal.Width, data = iris)
+@ 
+
+\subsection{Plot Symbols}
+
+The default plot uses the same symbol for each point. However, our data frame includes samples from
+three different species:
+
+<<iris-factors>>=
+str(iris)
+@ 
+
+Recall that a factor is just a vector of integers, with each integer having it's own label. We can
+display the underlying numbers by converting from factor to numeric:
+
+<<factor-to-numeric>>=
+as.numeric(iris$Species)
+@ 
+
+This is a very useful feature. It means we can set a different plot symbol for each species: 
 
 <<iris-fig-1-source, eval=FALSE>>=
 plot(Sepal.Length ~ Sepal.Width, pch = as.numeric(Species), data = iris)
@@ -156,11 +190,12 @@ par(bg="#FCFCFC")
 Now we can see what we're working with. The layout isn't ideal. In particular, the plot is very
 small relative to the size of the figure. We can fix this with the \texttt{mar} parameter.
 \texttt{mar} takes a vector of four integers, which set the width of the margin on the bottom, left,
-top and right sides respectively (remember clockwise from the bottom!). The default is \texttt{c(5,
-  4, 4, 2) + 0.1}. The top margin in particular is usually too wide. We will very rarely add a title
-to a published figure, so we don't need to set aside space for it.
+top and right sides respectively (remember clockwise from the bottom!). These numbers refer to the
+width of each margin in \texttt{lines} --- i.e., the width required for a single line of text. The
+default is \texttt{c(5, 4, 4, 2) + 0.1}. The top margin in particular is usually too wide. We will
+very rarely add a title to a published figure, so we don't need to set aside space for it.
 
-Set the value of \texttt{mar} with the \texttt{par} function:
+Set the value of \texttt{mar} with the \texttt{par} function.
 
 <<iris-fig-2-source, eval = FALSE>>=
 par(mar = c(3, 3, 0.5, 0.5))
@@ -293,7 +328,8 @@ If you need a hint, take a look at the next section.
 
 If you want to select different symbols, it's easy to do with using R's subsetting syntax. By
 default, for three levels of our \texttt{Species} factor, we get symbols 1, 2, and 3. If instead we
-wanted to use symbols 19, 5, and 3, we could do this:
+wanted to use symbols 19, 5, and 3\footnote{How did I pick 19, 5 and 3? You can see all 25 symbols
+  with \texttt{plot(1:25, pch = 1:25)}}, we could do this:
 
 <<symbols-source1, eval=FALSE, echo=FALSE>>=
 mysymbols <- c(19, 5, 3)
@@ -317,6 +353,18 @@ legend(legend = levels(iris$Species), x = "top", pch = mysymbols, horiz = TRUE,
 <<symbols, fig.width=3.5, fig.height=3.5, fig.align="center", echo = -1>>=
 par(bg="#FCFCFC", mar = c(3, 3, 0.5, 0.5))
 <<symbols-fig-source>>
+@ 
+
+That's an important application of \texttt{R}'s subsetting commands, so make sure you follow what
+happened --- we subset the \texttt{mysymbols} vector with the longer
+\texttt{as.numeric(iris\$Species)} vector, which converted the values from \texttt{(1, 2, 3)} to
+\texttt{(19, 5, 3)}: 
+
+
+<<selecting-symbols>>=
+mysymbols
+as.numeric(iris$Species)
+mysymbols[as.numeric(iris$Species)]
 @ 
 
 \subsection{Panels}
@@ -447,7 +495,12 @@ There are still a few problems with our panel:
 
 If you change \texttt{ylim}, you can put the legend on the bottom, and make space for the label at
 the top. Go ahead and see what you can do with this. You can use my example, Figure
-\ref{fig:final-product}, as a model. Alternatively, try formatting your own data according to the
+\ref{fig:final-product}, as a model. There is a trick to formatting the x-axis of boxplots. When
+calling the function \texttt{axis}, you'll have to set the \texttt{at} argument to indicate where to
+plot the labels (which should be \texttt{(1, 2, 3)}, and you'll have to set the \texttt{labels}
+argument to indicate what the labels should be.
+
+Alternatively, try formatting your own data according to the
 requirements of a journal in your field.
 
 \section{Image Formats}
@@ -542,6 +595,16 @@ This command creates a new file, \texttt{iris-embed.eps}, that has the font info
 the file. Fonts can be tricky, and specific details vary between Windows, Mac and Linux. It's
 easiest to stick to the default font settings, and only dive into custom fonts and settings if you
 are required by the publisher.
+
+Note that, \texttt{pdf} files are more common than \texttt{eps}. You can create \texttt{pdf} image
+files directly from \texttt{R} as well, using:
+
+<<pdf-example, eval=FALSE>>=
+pdf("iris.pdf", height = 3.5, width = 3.5, paper = "special", onefile = FALSE) 
+## insert plot code here!
+dev.off()
+@ 
+
 
 \end{document}
 

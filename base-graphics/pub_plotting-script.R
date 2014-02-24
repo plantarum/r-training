@@ -4,6 +4,15 @@ dev.new(height = 3.5, width = 3.5)
 
 #' \section{Content}
 #' 
+plot(Sepal.Length ~ Sepal.Width, data = iris)
+
+
+#' \subsection{Plot Symbols}
+#' 
+
+str(iris)
+as.numeric(iris$Species)
+
 
 plot(Sepal.Length ~ Sepal.Width, pch = as.numeric(Species), data = iris)
 
@@ -51,6 +60,10 @@ mtext("Sepal Length", side = 2, line = 1.5)
 legend(legend = levels(iris$Species), x = "top", pch = mysymbols, horiz = TRUE, 
        bty = 'n', cex = 0.9, text.width = c(0.6, 0.7, 0.6))
 
+mysymbols
+as.numeric(iris$Species)
+mysymbols[as.numeric(iris$Species)]
+
 #' \subsection{Panels}
 #' 
 
@@ -96,7 +109,6 @@ text("B", x = 3.2, y = 0.24, cex = 2)
 
 
 ## ----panel2Bc, fig.width=7.25, fig.height=3.5, fig.align="center", echo = FALSE----
-par(bg="#FCFCFC")
 par(mfrow = c(1, 2))
 par(mar = c(3, 3, 0.5, 0.5))
 mysymbols <- c(19, 5, 3)
@@ -140,7 +152,7 @@ text("B", x = grconvertX(0.9, from="npc", to="user"),
 
 tiff(filename = "iris.tiff", width = 3.5, height = 3.5, units="in", res = 1000,
      compression = "lzw")
-par(bg="#FCFCFC", mar = c(3, 3, 0.5, 0.5))
+par(mar = c(3, 3, 0.5, 0.5))
 plot(Sepal.Length ~ Sepal.Width, pch = as.numeric(Species), data = iris, 
      ann = FALSE,                       # turn off axis labels
      axes = FALSE)                      # turn off axis ticks
@@ -156,7 +168,7 @@ dev.off()
 
 postscript("iris.eps", height = 3.5, width = 3.5,
            paper = "special", onefile = FALSE, horizontal = FALSE)
-par(bg="#FCFCFC", mar = c(3, 3, 0.5, 0.5))
+par(mar = c(3, 3, 0.5, 0.5))
 plot(Sepal.Length ~ Sepal.Width, pch = as.numeric(Species), data = iris, 
      ann = FALSE,                       # turn off axis labels
      axes = FALSE)                      # turn off axis ticks
