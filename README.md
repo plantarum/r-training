@@ -42,3 +42,10 @@ An overview of Reproducible Research, and a workflow for achieving it
 with R, Markdown and RStudio. Primarily a lecture, with material
 repurposed from Roger Peng's Coursera material:
 https://github.com/rdpeng/courses
+
+### packages
+
+An demonstration outlining the process for creating, installing and
+building an R package. At the completion of the demonstration, you
+should be able to create your own R package, and understand enough to
+make sense of the copious documentation provided with R.

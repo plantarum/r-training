@@ -12,6 +12,9 @@
 auto
 *~
 *out
+*.zip
+*.tar.gz
+figure/
 .Rproj.user
 plotting-answers.R
 Sweavel.sty

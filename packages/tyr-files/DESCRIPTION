@@ -1,0 +1,9 @@
+Package: tyr
+Type: Package
+Title: Utility functions for interactive sessions
+Version: 1.0
+Date: 2014-02-21
+Author: Tyler Smith
+Maintainer: Tyler Smith <tyler@plantarum.ca>
+Description: Provides functions for interactively exploring data.
+License: GPL (>= 3)

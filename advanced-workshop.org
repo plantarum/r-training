@@ -1,0 +1,48 @@
+
+* Plotting
+
+** Pre-requisites:
+  - recent version of R
+  - familiarity editing R scripts, some exposure to R plotting
+  - publication_plots.pdf
+  - plotting-script.R
+  - optionally, your own data to plot
+
+** Outline
+  - We will work through the example in publication_plots.pdf together, which includes two
+    short exercises
+  - After we have finished the example, you will have time to continue working on the
+    sample data, or, preferably, your own data
+  - We will complete the lesson by reviewing issues that you encountered while working
+    through your own data
+
+* Reproducible Research with R, Markdown and knitr
+
+** Pre-requisites
+  - a recent version of R
+  - RStudio (preferably, but other editors will do)
+  - the ~knitr~ package installed in your R library 
+  - my slides: ~r-markdown.html~ (opens in a web-browser instead of powerpoint) 
+  - example files: ~rmd-example.zip~, ~cranberry-example.zip~
+  - optionally, install [[http://johnmacfarlane.net/pandoc/][pandoc]] and [[http://www.latex-project.org/][LaTeX]] for converting from ~.Rmd~ format to ~.pdf~
+
+** Outline
+  - I will present a slide deck outlining the concept of Reproducible Research, and how to
+    accomplish this with R, ~knitr~, Markdown and RStudio
+  - Following this, you will have time to experiment with the system, preparing your own
+    ~html~ reports, and, if you have ~pandoc~ and ~LaTeX~ installed, ~pdf~ reports as well.
+
+* Introduction to R Packages
+
+** Pre-requisites
+  - a recent version of R
+  - the files ~r-packages.pdf~ and ~topcor.R~
+  - [[https://support.rstudio.com/hc/en-us/articles/200486498][R development tools]] installed
+  - the ~devtools~ and ~roxygen2~ packages installed in your R library (provide some
+    optional RStudio features)
+
+** Outline
+  - I will present an overview of the process of creating, installing and building a
+    package, as outlined in ~r-packages.pdf~. After I have completed the demonstration,
+    you will have time to extend the package yourself, or to create your own package using
+    your own code.

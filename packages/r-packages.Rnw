@@ -1,0 +1,863 @@
+\documentclass{article}
+\usepackage{tgschola}             % favourite font
+\usepackage[T1]{fontenc}          % required with font packages
+\usepackage[section]{placeins}    % keep figures in the section where
+                                  % they're referenced
+\usepackage[scaled=0.9]{DejaVuSansMono}           % DejaVuSans font for code
+%%\usepackage{natbib}               % reference style
+%%\bibpunct{(} {)} {;} {a} {} {,}   % citation formatting
+\usepackage[margin=1in]{geometry} % document size
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+\usepackage[dvipsnames]{xcolor}
+
+\def\Rcolor{\color{black}}
+\def\Routcolor{\color{black}}
+\def\Rcommentcolor{\color{BrickRed}}
+\def\Routbackground{\color{white}}
+\def\Rbackground{\color[gray]{0.95}}
+\def\Sweavesize{\normalsize}
+
+\lstdefinestyle{Rstyle}{fancyvrb=false,escapechar=`,language=R,%
+                        basicstyle={\Rcolor\Sweavesize\ttfamily},% some want \ttfamily too
+                        backgroundcolor=\Rbackground,%
+                        showstringspaces=false,%
+                        keywordstyle=\color{blue},%
+                        commentstyle={\Rcommentcolor\ttfamily},%
+                        alsoother={$},%
+                        alsoletter={.<-},%
+                        otherkeywords={!,!=,~,$,*,\&,\%/\%,\%*\%,\%\%,<-,<<-,/},%
+                        escapeinside={(*}{*)},
+                        frame=single,framerule=0.2pt,framesep=3pt}%
+
+\lstdefinestyle{latex}{fancyvrb=false,escapechar=`,language=TeX,%
+                        basicstyle={\Rcolor\footnotesize\ttfamily},% some want \ttfamily too
+                        commentstyle={\Rcommentcolor\ttfamily},%
+                        showstringspaces=false,%
+                        frame=single,framerule=0.2pt,framesep=3pt}%
+                      
+\title{R Packages}
+\author{Tyler Smith}
+
+\begin{document}
+
+\maketitle{}
+
+%% replace.assign converts = to -> where appropriate
+%% width limits the width of the R output to something easily displayed
+%% on a printed page. include=FALSE hides this from the output
+%% render_listings() turns on the LaTeX listings package
+<<formatting,include=FALSE>>=
+options(replace.assign=TRUE, width=80)
+opts_chunk$set(tidy = FALSE)
+render_listings()
+@ 
+
+\section{Learning Objectives}
+
+At the end of this lesson, you should be able to:
+
+\begin{itemize}
+\item understand the structure of an R package
+\item make a new package skeleton with RStudio and/or the \texttt{package.skeleton()} function
+\item fill in the \texttt{DOCUMENTATION} and \texttt{.Rd} files
+\item install the package into your library
+\item build the package for distribution to colleagues
+\item modify and update your package
+\end{itemize}
+
+\section{Pre-requisites}
+
+You must have the following software installed on your computer:
+
+\begin{itemize}
+\item a recent version of R
+\item the \href{https://support.rstudio.com/hc/en-us/articles/200486498}{R development tools} for
+  your operating system
+\item \href{http://www.rstudio.com}{RStudio}
+\end{itemize}
+
+You may also wish to install the \texttt{devtools} and \texttt{roxygen2} packages. We won't need
+them for the demonstration that follows, but they provide some useful tools to help you along once
+you understand the basics.
+
+\section{Overview}
+
+R packages have a number of useful features that make them a convenient way to share code with other
+researchers. Usually, we are consumers of packages prepared by experts, but they aren't actually
+that hard to write yourself. However, given the number of features available, the documentation is
+imposing for beginners. For this lesson, we'll prepare a very simple package, using only the most
+basic features. For full details, see the ``Writing R Extensions'' manual, which is bundled with
+every installation of R. If you're using RStudio, you'll find it on the home page of the help
+viewer.  
+
+\section{Motivation}
+
+For this exercise, we'll package up a simple R function that I use to summarize correlation
+matrices. I call it topcor:
+
+<<topcor>>=
+topcor <- function(dat, lim = 5, thresh = 0.9){
+  cors <- cor(dat)
+  res <- list()
+  for (i in 1:nrow(cors)){
+    tmp <- list(cors[i, order(abs(cors[i,]), decreasing = TRUE)][1:(1 + lim)])
+    if (tmp[[1]][2] > thresh){
+      lab <- names(tmp[[1]])[1]
+      res <- c( res, list(tmp[[1]][-1]))
+      names(res)[length(res)] <- lab
+    }
+  }
+  res  
+}
+@ 
+
+In conducting multivariate analyses, I often want to remove variables from a dataset if they are too
+highly correlated with others. However, reading through the output of \texttt{cor} on its own is tedious,
+particularly for larger datasets:
+
+<<cor-example, message = FALSE>>=
+library(vegan)
+data(varechem)
+cor(varechem)
+@ 
+
+\texttt{topcor} provides a sorted list of variables with high correlations, and provides a list of the
+variables that they are most correlated with:
+
+<<topcor-example>>=
+topcor(varechem, thresh = 0.8)
+@ 
+
+This is a handy function to have available. Eventually, I may have a collection of similar functions
+that I'd like to use in my interactive R sessions. I have a couple of simple options:
+
+\begin{itemize}
+\item load the functions explicitly with \texttt{source("/path/to/topcor.R")}
+\item add the functions to my \texttt{.Rprofile}
+\end{itemize}
+
+The first option is the easiest to implement - just call \texttt{source}. However, I'll either need
+to copy the file to my working directory for each project, or remember where the file is stored and
+use an absolute path to that file.
+
+The second option is a little better. By default, when R starts up it loads the \texttt{.Rprofile}
+file from your home directory. This file can contain any R code you like, including function
+definitions, loading libraries, loading data sets etc. You wouldn't want to use this for code that
+is crucial for analysis --- if you do, you might forget it's there, making it harder to document
+what you've done. On the other hand, for convenience functions for use in interactive sessions, it's
+a reasonable option to explore. On Linux the location it is found (or should be created) at
+\texttt{~/.Rprofile}. On windows, you can find your home directory with the R command
+\texttt{Sys.getenv("R\_USER")}.
+
+Both of these options have some shortcomings. Notably, they add \texttt{topcor} to our global
+environment, which means whenever we clear our session:
+
+<<rm, eval=TRUE>>=
+rm(list=ls())
+@ 
+
+\texttt{topcor} is erased. Furthermore, there's no way to include any documentation for the
+function. Packages give us a tool that doesn't have either problem. 
+
+Our example is very basic, and may in fact be better implemented as code in \texttt{.Rprofile}.
+Packages become most useful when you are writing a suite of functions that will be central
+components of your analysis, especially if you are going to share them with colleagues.
+Nevertheless, having a simple example is a good way to learn the basics of packaging.
+
+\subsection{Package Benefits}
+
+Once installed, an R package is available from R no matter what working directory you are in. The
+installation process makes sure that a copy is stored in the correct directory, meaning you can get
+your code with \texttt{library(my-package)}. Furthermore, loading a package installs the code in its
+own environment within R. This means that when you clear your workspace with \texttt{rm(list =
+  ls())} the functions in your package remain. And, as you know from working with other packages,
+you can include copious documentation with your code, available through the help system.
+
+\section{What is a Package?}
+
+A package is just a group of files in a directory. It \textbf{must} contain:
+
+\begin{itemize}
+\item \texttt{DESCRIPTION} file
+\item \texttt{R} directory with one or more \texttt{.R} code files
+\end{itemize}
+
+\noindent{}It should contain:
+
+\begin{itemize}
+\item \texttt{man} directory with your documentation files
+\end{itemize}
+
+\noindent{}Optional contents:
+
+\begin{itemize}
+\item \texttt{data} directory for data files
+\item \texttt{src} directory for source code from compiled languages (C, C++ etc.)
+\item \texttt{inst/doc} directory for longer documentation files: vignettes, tutorials etc.
+\end{itemize}
+
+Further options are contained in ``Writing R Extensions''.
+
+\section{Creating a new R Package}
+
+
+RStudio, you can point-and-click your way through the menus to do this:
+
+\begin{center}
+  \texttt{File} $\rightarrow$ \texttt{New Project} $\rightarrow$ \texttt{New Directory}
+  $\rightarrow$ \texttt{R Package}
+\end{center}
+
+This brings up a window where you can indicate the name of the package (\texttt{tyr}), the
+source files to include in the file (\texttt{topcor.R}), and the directory to create the package in
+(pick something convenient here).
+
+\begin{center}
+\includegraphics[width=3in]{images/create-r-package.png}  
+\end{center}
+
+This will create a new RStudio project with the skeleton of your package in it. You can do the same
+thing from within R, without RStudio:
+
+<<package-skeleton, eval=FALSE>>=
+## add topcor function to a new package skeleton:
+package.skeleton("tyr", list = c("topcor")) 
+## or load a source file instead:
+package.skeleton("tyr", code_files = "topcor.R")
+@ 
+
+Using your file browser, you'll see that all the required and many of the optional components of the
+package have been placed in the \texttt{tyr} directory.
+
+Let's take a look at a few:
+
+\subsection{DESCRIPTION}
+
+\texttt{DESCRIPTION} is a plain text file, so you can open it in any editor.
+\texttt{package.skeleton} has provided an informative summary of the required information. 
+
+\begin{lstlisting}[style=latex, title={DESCRIPTION skeleton}]
+Package: tyr
+Type: Package
+Title: What the package does (short line)
+Version: 1.0
+Date: 2014-02-21
+Author: Who wrote it
+Maintainer: Who to complain to <yourfault@somewhere.net>
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
+\end{lstlisting}
+
+We can directly change the file to something more informative: 
+
+\begin{lstlisting}[style=latex, title={DESCRIPTION}]
+Package: tyr
+Type: Package
+Title: Utility functions for interactive sessions
+Version: 1.0
+Date: 2014-02-21
+Author: Tyler Smith
+Maintainer: Tyler Smith <tyler@plantarum.ca>
+Description: Provides functions for interactively exploring data.
+License: GPL (>= 3)
+\end{lstlisting}
+
+Again, full details are in the manual.
+
+\subsection{tyr/R/topcor.R}
+
+Our source code has been deposited unchanged into the \texttt{tyr/R} directory.
+
+\subsection{\texttt{tyr/man}}
+
+The documentation directory contains two files: \texttt{tyr-package.Rd} and \texttt{topcor.Rd}.
+The \texttt{.Rd} format is a markup language based on \LaTeX{}. It consists of a series of sections,
+which follow the syntax:
+
+\begin{lstlisting}[style=latex]
+\section-name{section content}
+\end{lstlisting}
+
+Some of the possible sections include:
+
+\begin{description}
+\item[name: ] The name of the object you are documenting.
+\item[alias: ] If this file documents more than one object, you should list each additional object
+  as a separate alias section. As a consequence, users will be directed to this file when they
+  request help for any listed \texttt{alias}. Note that if users might search for help on
+  \texttt{name}, it needs to be listed as an alias.
+\item[title: ] A short descriptive title for the file.
+\item[description: ] A longer, one-paragraph description of the contents.
+\item[usage: ] A summary example showing how the function is called.
+\item[arguments: ] A list explaining each of the arguments for the function. Each item in the list
+  will have the format:
+\begin{verbatim}
+\item{argument}{description of argument}
+\end{verbatim}
+\item[details: ] Further details about the function. Can be multiple paragraphs, if necessary.
+\item[value: ] An explanation of the value returned by the function. Can be multiple paragraphs.
+\end{description}
+
+There are other sections available, as well, as you will be aware of from reading the help files for
+existing packages. Options include: \texttt{references, note, author, seealso, examples}
+and \texttt{keyword}.
+
+Opening up \texttt{topcor.Rd}, we can see that \texttt{package.skeleton()} provides us with a
+template document to work from. Note that in \LaTeX, \% is a comment symbol, so any line that starts
+with a \% is a note to you that R will ignore when processing the file.
+
+\begin{lstlisting}[style=latex, title={topcor.Rd skeleton}]
+\name{topcor}
+\alias{topcor}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{
+%%  ~~function to do ... ~~
+}
+\description{
+%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+}
+\usage{
+topcor(dat, lim = 5, thresh = 0.9)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{dat}{
+%%     ~~Describe \code{dat} here~~
+}
+  \item{lim}{
+%%     ~~Describe \code{lim} here~~
+}
+  \item{thresh}{
+%%     ~~Describe \code{thresh} here~~
+}
+}
+\details{
+%%  ~~ If necessary, more details than the description above ~~
+}
+\value{
+%%  ~Describe the value returned
+%%  If it is a LIST, use
+%%  \item{comp1 }{Description of 'comp1'}
+%%  \item{comp2 }{Description of 'comp2'}
+%% ...
+}
+\references{
+%% ~put references to the literature/web site here ~
+}
+\author{
+%%  ~~who you are~~
+}
+\note{
+%%  ~~further notes~~
+}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\seealso{
+%% ~~objects to See Also as \code{\link{help}}, ~~~
+}
+\examples{
+##---- Should be DIRECTLY executable !! ----
+##-- ==>  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (dat, lim = 5, thresh = 0.9) 
+{
+    cors <- cor(dat)
+    res <- list()
+    for (i in 1:nrow(cors)) {
+        tmp <- list(cors[i, order(abs(cors[i, ]), decreasing = TRUE)][1:(1 + 
+            lim)])
+        if (tmp[[1]][2] > thresh) {
+            lab <- names(tmp[[1]])[1]
+            res <- c(res, list(tmp[[1]][-1]))
+            names(res)[length(res)] <- lab
+        }
+    }
+    res
+  }
+}
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{ ~kwd1 }
+\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+
+\end{lstlisting}
+
+The \texttt{tyr-package.Rd} file is very similar in layout. It includes a small table, which has a
+slightly different format:
+
+\begin{lstlisting}[style=latex]
+\details{
+\tabular{ll}{
+Package:  \tab tyr\cr
+Type:  \tab Package\cr
+Version:  \tab 1.0\cr
+Date:  \tab 2014-02-21\cr
+License:  \tab What license is it under?\cr
+}
+\end{lstlisting}
+
+Here, the package details are provided in a table. Table columns are separated by \texttt{\textbackslash{}tab}, and
+rows end with \texttt{\textbackslash{}cr}. The rest of the file is relatively self-explanatory. 
+
+After updating the files, they look like this:
+
+\begin{lstlisting}[style=latex, title=topcor.Rd]
+\name{topcor}
+\alias{topcor}
+\title{Summarize variables with high correlations}
+\usage{
+topcor(dat, lim = 5, thresh = 0.9)
+}
+\arguments{
+  \item{dat}{a numerical matrix or data frame}
+
+  \item{lim}{the number of correlations to display for each
+  of the variables identified}
+
+  \item{thresh}{the correlation threshold to use when
+  searching for variables}
+}
+\value{
+  
+  A list of lists. The first list corresponds to the variable with the
+  highest correlation with another variable in the matrix. The list
+  reports the top `lim` absolute correlations for the named variable.
+
+}
+\description{
+  Identify variables with the highest correlation in a data set
+}
+\details{
+  Given a matrix or data.frame, return a list of all variables that have
+  at least one correlation > `thresh` with another variable. For each
+  variable in this set, return the list of the `lim` variables with the
+  greatest (absolute) correlations. 
+}
+\author{
+Tyler Smith
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=latex, title=tyr.Rd]
+\docType{package}
+\name{tyr}
+\alias{tyr}
+\alias{tyr-package}
+\title{Utility Functions for Interactive R Sessions}
+\description{
+Miscellaneous Utility Functions for Interactive R Sessions
+}
+\details{
+\tabular{ll}{ 
+Package: \tab tyr\cr 
+Type: \tab Package\cr
+Version: \tab 1.0\cr
+Date: \tab 2014-02-21\cr
+License: \tab GPL (>= 3)\cr 
+LazyLoad: \tab yes\cr 
+}
+Convenience functions for common operations in interactive R sessions.
+}
+\author{
+Tyler Smith \email{tyler@plantarum.ca}
+}
+\keyword{correlation}
+\keyword{package}
+
+\end{lstlisting}
+
+
+\section{Installing and Building the Package}
+
+\subsection{Installing the Package Locally}
+
+With completed manual pages, we can now install our package. From RStudio point-and-click:
+
+\begin{center}
+  Build $\rightarrow$ Build and Reload
+\end{center}
+
+You can also do this directly from R:
+
+<<install-package, eval=FALSE>>=
+install.packages("tyr", repos = NULL)
+@ 
+
+Note that installing a package isn't the same as loading it. To actually use the code in the
+library, we need to load it into R:
+
+<<load-package, eval=TRUE>>=
+library(tyr)
+@ 
+
+\texttt{tyr} is now a first-class member of our R installation. It is installed to our library, and
+we can load and use it like any other package. We can edit the source files as needed, and
+rebuild/reinstall the package to update our changes. 
+
+\subsection{Building the Package}
+
+To share the package with colleagues, we could just send them a copy of the entire directory.
+However, it is more usual to \emph{build} the package first, which produces a single file. RStudio
+provides this via:
+
+\begin{center}
+  Build $\rightarrow$ Build Source Package
+\end{center}
+
+There is no way to do this directly from \emph{within} R, but rather from the command line:
+
+<<build, eval=FALSE>>=
+R CMD build tyr
+@ 
+
+The result is the file \texttt{tyr\_1.0.tar.gz}. This can be sent to colleagues, who can then install
+it from the command line:
+
+<<install-command-line, eval=FALSE>>=
+R CMD install tyr_1.0.tar.gz
+@ 
+
+or from within R:
+
+<<install-R, eval=FALSE>>=
+install.packages("tyr_1.0.tar.gz", repos = NULL)
+@ 
+
+RStudio provides an option to install from ``package archive file'' as well, allowing you to specify
+a \texttt{tar.gz} file instead of an online repository.
+
+\texttt{tyr\_1.0.tar.gz} is a \emph{source package}, which contains an archive of all the source
+files required to install the package. This format is portable across platforms. There are also
+options to build \emph{binary packages}, which are platform specific. That is, you need to build a
+separate package for Windows, Mac and Linux. This isn't necessary unless you wish to distribute code
+compiled C or FORTRAN code, which we won't be discussing today.
+
+\section{Updating Installed Packages}
+
+Changing the code in an installed package is a little more involved than simply repeating the source
+code. This is because packages get loaded into a separate environment from the code we enter at the
+terminal. For instance, if we were to use the name \texttt{topcor} in our code \emph{after} we load
+\texttt{tyr}, it won't alter the version in the package. Instead, it will produce a new object that
+\emph{masks} the packaged version of \texttt{topcor}.
+
+<<masking>>=
+data(varechem)
+topcor(varechem, thresh = 0.8)          # topcor in the tyr package
+topcor <- "hello there"                 # define topcor in the global environment
+topcor                                  # topcor the variable masks the function in tyr
+rm(topcor)                              # remove topcor from the global environment
+topcor(varechem, thresh = 0.8)          # topcor in the tyr package is unmasked
+@ 
+
+In the first line, we call \texttt{topcor} as usual. Then we use the name \texttt{topcor} to store a
+string. That creates a new variable named \texttt{topcor}, which masks the function \texttt{topcor}
+that is stored in our package. The new meaning of \texttt{topcor} holds until it is removed, at
+which point the function in our package is unmasked.
+
+\subsection{Environments}
+
+To understand this, we need to know a bit about how R treats environments. When R starts, it loads a
+number of packages from the library. Each of these packages contains a number of objects (variables,
+functions etc). As you use R interactively, you will also add variables to the \emph{global
+  environment}. 
+
+Whenever your code refers to an object, R has to look for the object. It always looks first in the
+global environment. If it doesn't find the object there, it looks one by one through the loaded
+packages until it find the name it is looking for. If the name exists in more than one package, only
+the first one counts --- the others are \emph{masked}. Because the global environment is always
+searched first, if a name occurs there, it will mask any other objects with the same name in
+attached packages.
+
+The R function \texttt{searchpaths()} will show you a list of all the environments that R will
+search for an object. \texttt{.GlobalEnv} is \emph{always} the first element in this list. The rest
+of the values will be the packages loaded automatically by R, or that you have loaded during the
+session.
+
+Once we start writing our own packages, we shift from entering our code directly into the global
+environment, and instead start adding environments to the search path. This requires special
+handling when we want to modify code in a package.
+
+\subsection{Modifying and Reinstalling a Package}
+
+The most straightforward way to update the code in a package is to use a three-step process:
+
+\begin{enumerate}
+\item Modify the source code.
+\item Install the package again. Use the same installation commands as above; the new code will
+  over-write the existing installation, you don't need to remove it.
+\item Unload and re-attach the package, so your current R session will be using the updated code.
+\end{enumerate}
+
+Up until now, we haven't had to unload a package from the library. This can be done with the
+following code:
+
+<<detach, eval=FALSE>>=
+detach(name = "package:tyr", unload = TRUE, character.only=TRUE)
+@ 
+
+You'll probably only ever use \texttt{detach} when you are planning to re-attach the package
+immediately, in order to load the updated code. I have written a little function that does just
+this:
+
+<<reup>>=
+reup <- function(package){
+  pname = paste("package:", package, sep = "")
+  detach(name = pname, unload = TRUE, character.only = TRUE)
+  library(package = package, character.only = TRUE)
+}
+@ 
+
+This allows me to uninstall and reinstall the package in a single line: \texttt{reup("tyr")}. That's
+a very handy function, something we might want to add to our utility package! 
+
+We already have the source code. We need to save the source of the function into a file in the
+\texttt{tyr/R/} directory. Then we'll need to add a documentation file. R can provide another
+skeleton for us to use, via the \texttt{prompt()} function:
+
+<<prompt>>=
+prompt(reup)
+@ 
+
+Our documentation file has appeared! All that remains is to move it to \texttt{tyr/man} and fill in
+the blanks.
+
+Now we can re-install \texttt{tyr} completely with two lines of code:
+
+<<reinstall, eval=FALSE>>=
+install.packages("tyr", repos = NULL)
+reup("tyr")
+@ 
+
+\subsection{Exercise: Adding \texttt{reup} to \texttt{tyr}}
+
+Complete the documentation in \texttt{reup.Rd} and update the \texttt{tyr} package. Check to see
+that you can read the help files for both functions from within R.
+
+\texttt{reup} could be extended to include the \texttt{install.packages} command as well. If you
+assume you would only use \texttt{reup} when your working directory contains the package source
+directory (i.e., \texttt{tyr/}), you could move \texttt{install.packages} right inside the body of
+\texttt{reup}, allowing you to reinstall, detach and reload your library all with one line of code. 
+
+\section{Development Tools}
+
+There are still a number of tedious steps involved in preparing packages. This process is used by
+thousands of people all over the world, and many of them are talented, lazy programmers. Tedium is
+an affront to lazy programmers, and given a chance they can usually be counted on to find ways to
+automate away the tedious aspects of writing programs.
+
+Hadley Wickham is one such lazy programmer. He has developed a number of tools to reduce the amount
+of tedium involved in preparing R packages. His process is documented in his book, ``Advanced R
+Programming'', an extensive preview of which is available on \href{http://adv-r.had.co.nz/}{his
+  website}. He has two packages in particular that are of interest to us:
+
+\begin{description}
+\item[roxygen2: ] tools for including documentation notes in your \texttt{.R} files, so that the
+  \texttt{.Rd} files can be automatically generated; you write slightly more detailed code files,
+  but never write another \texttt{.Rd} man file again!
+\item[devtools: ] tools to help with the loading and unloading of packages. An alternative and more
+  sophisticated approach to my \texttt{reup()} function.
+\end{description}
+
+Many of Hadley's extensions are built-in to the RStudio editor, so also check the documentation on
+the
+\href{https://support.rstudio.com/hc/en-us/articles/200486488-Developing-Packages-with-RStudio}{RStudio
+  website}.  
+
+An excellent reference on developing R code in general, including packages, is John Chambers'
+``Software for Data Analysis'', published by Springer. This book is a very useful overview of the R
+programming ecosystem.
+
+\section{Application}
+
+At this point, you have several approaches available to you when developing R projects: R scripts, R
+markdown reports, and R packages. You'll have to decide for yourself when to use each method. My suggestions:
+
+\begin{description}
+\item[scripts] Short analyses with a limited shelf-life. Great for working out kinks in an analysis
+  you're working out with a team over email. Not good for sharing with people who aren't intimately
+  familiar with the code, or for longer term storage.
+\item[R markdown] Lengthy analyses, especially if you want to share the results with people who
+  don't use R. Great for documenting your work on projects you'll return to in the future.
+\item[packages] Once you're in the habit of using them, the best way to archive collections of
+  functions. Markdown is better for documenting a particular analysis. For large projects, consider
+  including the markdown reports in the \texttt{inst/doc} directory of a package.
+\end{description}
+
+
+%% insert a \FloatBarrier wherever you want to clear floats from the
+%% previous section  
+\FloatBarrier                           
+%% \bibliographystyle{sysbot2}
+%% \bibliography{ab,ty2}
+
+\end{document}
+
+# tyr/man/tyr-package.Rd
+
+```{latex}
+\name{tyr-package}
+\alias{tyr-package}
+\alias{tyr}
+\docType{package}
+\title{
+What the package does (short line)
+~~ package title ~~
+}
+\description{
+More about what it does (maybe more than one line)
+~~ A concise (1-5 lines) description of the package ~~
+}
+\details{
+\tabular{ll}{
+Package:  \tab tyr\cr
+Type:  \tab Package\cr
+Version:  \tab 1.0\cr
+Date:  \tab 2014-02-21\cr
+License:  \tab What license is it under?\cr
+}
+~~ An overview of how to use the package, including ~~
+~~ the most important functions ~~
+}
+```
+
+# tyr/man/tyr-package.Rd
+
+```{latex}
+\author{
+Who wrote it
+
+Maintainer: Who to complain to <yourfault@somewhere.net>
+~~ The author and/or maintainer of the package ~~
+}
+\references{
+~~ Literature or other references for background information ~~
+}
+~~ Optionally other standard keywords, one per line, ~~
+~~ from file KEYWORDS in the R documentation ~~
+~~ directory ~~
+\keyword{ package }
+\seealso{
+~~ Optional links to other man pages, e.g. ~~
+~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+}
+\examples{
+~~ simple examples of the most important functions ~~
+}
+```
+
+# tyr/man/topCor.Rd
+
+```{latex}
+```
+
+# Building the Package
+
+
+
+# Documentation Option 2
+- delete the existing \texttt{.Rd} templates
+- use \texttt{roxygen2} to build your documentation instead
+    - integrated into RStudio
+- all documentation stored directly in the \texttt{.R} code files
+
+# Roxygen
+![](images/roxygen-settings.png)
+
+# R/tyr-package.R
+```
+##' Title (one sentence)
+##' 
+##' Description (one paragraph)
+##' \tabular{ll}{
+##' Package: \tab tyr\cr
+##' Type: \tab Package\cr
+##' Version: \tab 1.0\cr
+##' Date: \tab 2014-02-21\cr
+##' License: \tab GPL (>= 3)\cr
+##' LazyLoad: \tab yes\cr
+##' }
+##'
+##' Description 
+##' 
+##' @name package-name
+##' @aliases package-name-package
+##' @docType package
+##' @title title sentence
+##' @author Author Name \email{author@@email.ca}
+##' @keywords keyword1 keyword2
+NULL
+```
+
+
+# R/tyr-package.R
+```
+##' Miscellaneous Utility Functions for Interactive R Sessions
+##' 
+##' \tabular{ll}{
+##' Package: \tab tyr\cr
+##' Type: \tab Package\cr
+##' Version: \tab 1.0\cr
+##' Date: \tab 2014-02-21\cr
+##' License: \tab GPL (>= 3)\cr
+##' LazyLoad: \tab yes\cr
+##' }
+##'
+##' Convenience functions for common operations in interactive R
+##' sessions 
+##' 
+##' @name tyr
+##' @aliases tyr-package
+##' @docType package
+##' @title Utility Functions for Interactive R Sessions
+##' @author Tyler Smith \email{tyler@@plantarum.ca}
+##' @keywords package correlation
+NULL
+```
+
+# Roxygenize
+
+
+
+
+%% \Sexpr{## inline r-code goes here}
+
+%% <<chunk-name,options>>=
+%% R code goes here
+%% @ 
+%% 
+%% chunk name can include alphanumeric, '-' and '_'. Other symbols or
+%% spaces cause problems.
+%% 
+%% options can be separated by a space, but no line breaks in the chunk header!
+%% 
+%% some key options and their defaults:
+%% eval=TRUE or FALSE - run code? TRUE
+%% echo=TRUE or FALSE - display code in output? TRUE
+%% include=TRUE or FALSE - display chunk in output? TRUE
+%% results=markup, asis, hold, hide - how to process output. markup is
+%% default, provides output interleaved with source code, formatted.
+%% warning=TRUE or FALSE - display warnings from R? TRUE
+%% message, error - as for warning
+%% cache=TRUE or FALSE - store code evaluations, only evaluate when the
+%% code changes? FALSE
+
+%% Figures:
+%% Many options available: see http://yihui.name/knitr/options
+
+%% <<figure-title,fig.align='center', fig.height=4.5,fig.width=5, out.width=3, fig.cap='My caption, inside single quotes. Backslashes must be doubled \\emph{like this}'>>=
+%% plot(iris)
+%% @ 
+
+%% generated label will be fig:figure-title
+
+%% Emacs ESS commands:
+%% M-n s -- to knit: create the tex file: file.Rnw -> file.tex
+%% M-n P -- after knitting, produce the pdf output: file.tex -> file.pdf
+%% M-n u -- to purl: extract the R code: file.Rnw -> file.R
+%% < -- open a new chunk
+
+

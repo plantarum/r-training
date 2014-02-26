@@ -49,6 +49,8 @@ There are many options available for modifying the way R chunks are evaluated an
 
 You can scroll through these options with the **up** and __down__ arrows. Once you select an option, pressing _tab_ again will show you a list of the possible values for the option. The [knitr](http://yihui.name/knitr/) website includes a comprehensive explanation of all [chunk options](http://yihui.name/knitr/options).
 
+You can also mix `R` code with your text, allowing you to reference data directly. For example, the value of pi is `r pi`, and 21 times 2 is `r 2 * 21`.
+
 ### Plots
 You can also embed plots, for example:
 
@@ -90,3 +92,21 @@ mtext("Petal Width", side = 2, line = 1.5)
 text("B", x = grconvertX(0.1, from = "npc", to = "user"), 
      y = grconvertY(0.9, from = "npc", to = "user"), cex = 2)
 ``` 
+
+Generating PDF files
+---
+
+If you have [pandoc](http://johnmacfarlane.net/pandoc/)  and [LaTeX](http://www.latex-project.org/) installed, you can compile the `.Rmd` file to `.pdf` with the command:
+
+```
+pandoc example.md -o example.pdf
+```
+
+Note that this command runs from the command line, not from inside `R`. There are R tools to help with this. `knitr` provides the `pandoc()` function:
+
+```{r, eval=FALSE}
+library(knitr)
+pandoc(input="example.md", format = "latex")
+```
+
+`pandoc` has many features and options --- check out the webpage for extensive documentation. 

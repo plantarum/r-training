@@ -1,5 +1,5 @@
 
-topCor <- function(dat, lim = 5, thresh = 0.9){
+topcor <- function(dat, lim = 5, thresh = 0.9){
   cors <- cor(dat)
   res <- list()
   for (i in 1:nrow(cors)){

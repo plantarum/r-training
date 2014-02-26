@@ -317,4 +317,11 @@ Alternatively, `knitr` can process LaTeX documents
 - complete manuscript preparation system
     + many journals still require conversion to `doc` prior to submission
     + some suggest LaTeX is the domain of weirdos
+    
+Extra Tools
+===
+
+`pdf` output requires:
+- LaTeX: http://www.latex-project.org/
+- pandoc: http://johnmacfarlane.net/pandoc/
 
